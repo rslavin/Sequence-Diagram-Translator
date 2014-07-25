@@ -53,15 +53,16 @@ public class XMLParser {
 	 * Parses SD object which consists of all other components. Other components
 	 * are parsed through calls from this method.
 	 * 
-	 * @param element Root sequence diagram element in DOM tree.
+	 * @param xmlElement
+	 *            Root sequence diagram element in DOM tree.
 	 * @return Returns the root sequence diagram object.
 	 */
-	private static SD parseSequenceDiagram(Element element) {
+	private static SD parseSequenceDiagram(Element xmlElement) {
 		List<Lifeline> lifelines;
 		List<CF> cfs;
 
 		// populate lifeline list
-		NodeList lifelineNodes = element.getElementsByTagName("lifeline");
+		NodeList lifelineNodes = xmlElement.getElementsByTagName("lifeline");
 		if (lifelineNodes != null && lifelineNodes.getLength() > 0) {
 			lifelines = new ArrayList<Lifeline>();
 			for (int i = 0; i < lifelineNodes.getLength(); i++) {
@@ -72,7 +73,7 @@ public class XMLParser {
 		}
 
 		// populate combined fragment list
-		NodeList cfNodes = element.getElementsByTagName("combinedFragment");
+		NodeList cfNodes = xmlElement.getElementsByTagName("combinedFragment");
 		if (cfNodes != null && cfNodes.getLength() > 0) {
 			cfs = new ArrayList<CF>();
 			for (int i = 0; i < cfNodes.getLength(); i++) {
@@ -81,7 +82,7 @@ public class XMLParser {
 		}
 
 		// create SD object
-		SD sequenceDiagram = new SD(element.getElementsByTagName("name").toString(), lifelines, cfs);
+		SD sequenceDiagram = new SD(xmlElement.getAttribute("name"), lifelines, cfs);
 
 		// generate list of sending OSes (one OS per message)
 		List<OS> allMessages = new ArrayList<OS>();
@@ -89,21 +90,29 @@ public class XMLParser {
 			Lifeline curLifeline = lifelines.get(i);
 			for (int j = 0; j < curLifeline.oses.size(); j++) {
 				OS curOS = curLifeline.oses.get(j);
-				if (curOS.osType == OSType.SEND) {
+				if (curOS.osType == OSType.SEND)
 					allMessages.add(curOS);
-				}
+			}
+		}
+		for (Lifeline curLifeline : lifelines) {
+			for (OS curOS : curLifeline.oses) {
+				if (curOS.osType == OSType.SEND)
+					allMessages.add(curOS);
 			}
 		}
 
 		// remove from allMessages any messages that appear in AllCFMsg
-		allMessages.removeAll(AllCFMsg(sequenceDiagram.osesInCFs));
-
-		sequenceDiagram.osesInCFs = break2Alt(sequenceDiagram.osesInCFs, allMessages);
+		// TODO not sure about this
+		allMessages.removeAll(AllCFMsg(sequenceDiagram.osesInCFs())); 
+		
+		// TODO sequenceDiagram.osesInCFs =
+		// break2Alt(sequenceDiagram.osesInCFs(), allMessages);
 		sequenceDiagram.lifelines = composeLifeline(sequenceDiagram.lifelines);
 		sequenceDiagram.lifelines = composeEU(sequenceDiagram.lifelines, sequenceDiagram.cfs);
 		sequenceDiagram.lifelines = projectCF2LifelineList(sequenceDiagram.lifelines, sequenceDiagram.cfs);
 
 		return sequenceDiagram;
 	}
+
 
 }

@@ -17,5 +17,6 @@ public class CF {
 	public List<Operand> operands;
 	public OS firstOS; // was "int firstMsgNum"
 	public List<CEU> ceuList;
+	public List<OS> oses;
 
 }
