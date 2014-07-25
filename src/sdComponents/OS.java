@@ -20,6 +20,7 @@ public class OS {
 	public MessageType messageType;
 	public List<Constraint> constraints;
 	public int layer;
+	public int location; // unsure what this is
 
 	public OS(Lifeline lifeline, Lifeline connectedLifeline, String name, int number, OSType osType, MessageType messageType) {
 		this.lifeline = lifeline;

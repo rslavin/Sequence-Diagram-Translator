@@ -14,6 +14,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import comparators.OSComparator;
+
 import enums.MessageType;
 import enums.Operator;
 
@@ -108,11 +110,11 @@ public class XMLParser {
 
 		// remove from allMessages any messages that appear in AllCFMsg
 		// TODO not sure about this
-		allMessages.removeAll(AllCFMsg(sequenceDiagram.osesInCFs()));
+		allMessages.removeAll(allCFMsg(sequenceDiagram.osesInCFs()));
 
 		// TODO refactor break2Alt()
 		// break2Alt(sequenceDiagram.osesInCFs(), allMessages);
-		sequenceDiagram.lifelines = composeLifeline(sequenceDiagram.lifelines);
+		generateReceivingOSes();
 		sequenceDiagram.lifelines = composeEU(sequenceDiagram.lifelines, sequenceDiagram.cfs);
 		sequenceDiagram.lifelines = projectCF2LifelineList(sequenceDiagram.lifelines, sequenceDiagram.cfs);
 
@@ -202,7 +204,7 @@ public class XMLParser {
 	 *            shared with the CF to which this Operand belongs to.
 	 * @return Operand object.
 	 */
-	private static Operand parseOperand(Element xmlElement, ArrayList<Lifeline> lifelines) {
+	private static Operand parseOperand(Element xmlElement, List<Lifeline> lifelines) {
 		// find combined fragments if they exist
 		List<CF> combinedFragments = new ArrayList<CF>();
 		NodeList xmlCombinedFragments = xmlElement.getElementsByTagName("combinedFragment");
@@ -225,5 +227,40 @@ public class XMLParser {
 				.getAttribute("lifeline")));
 
 		return new Operand(constraint, new ArrayList<Lifeline>(lifelines), msgNums);
+	}
+
+	/**
+	 * Adds receiving OSes to the Lifelines by iterating through other
+	 * Lifelines.
+	 * 
+	 * @param oldLifelines
+	 *            Current List of Lifelines without receiving OSes.
+	 * @return New list of Lifelines with receiving OSes.
+	 */
+	private static void generateReceivingOSes() {
+		if (sequenceDiagram.lifelines != null && sequenceDiagram.lifelines.size() > 0) {
+			// for each lifeline
+			for (Lifeline oldLifeline : sequenceDiagram.lifelines) {
+				// check all other lifelines
+				for (Lifeline iterLifeline : sequenceDiagram.lifelines) {
+					// check other lifelines to see if they send a message to
+					// this lifeline
+					for (OS os : iterLifeline.oses) {
+						// if so, create a receiving OS on this lifeline
+						if (os.connectedLifeline.equals(oldLifeline))
+							oldLifeline.oses.add(new OS(oldLifeline, iterLifeline, os.name, os.number, OSType.RECEIVE,
+									os.messageType));
+					}
+				}
+				// reorder OSes to integrate new receiving OSes
+				Collections.sort(oldLifeline.oses, new OSComparator());
+				// TODO not sure why this is done
+				oldLifeline.directedOSes = new ArrayList<OS>(oldLifeline.oses);
+				// TODO not sure why this is done
+				for (int i = 1; i < oldLifeline.oses.size() + 1; i++)
+					oldLifeline.oses.get(i).location = i;
+			}
+		} else
+			System.err.println("composeLifeline: null Lifeline list.)");
 	}
 }

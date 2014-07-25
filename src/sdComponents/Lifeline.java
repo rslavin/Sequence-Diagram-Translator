@@ -24,5 +24,14 @@ public class Lifeline {
 		this.name = name;
 		this.type = type;
 	}
+	
+	public Lifeline(Lifeline clone){
+		this.name = clone.name;
+		this.type = clone.type;
+		this.oses = clone.oses;
+		this.directedOSes = clone.directedOSes;
+		this.directedCEUs = clone.directedCEUs;
+		this.connectedLifelines = clone.connectedLifelines;
+	}
 
 }
