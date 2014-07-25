@@ -16,4 +16,12 @@ public class Operand {
 	public List<CF> cfs;
 	public List<Lifeline> lifelines;
 	public List<EU> eus;
+	public List<Integer> msgNums;
+
+	public Operand(Constraint constraint, List<Lifeline> lifelines, List<Integer> msgNums) {
+		this.constraint = constraint;
+		this.lifelines = lifelines;
+		this.msgNums = msgNums;
+	}
+
 }

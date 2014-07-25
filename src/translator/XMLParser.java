@@ -4,6 +4,7 @@ import sdComponents.*;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import javax.xml.parsers.DocumentBuilder;
@@ -13,6 +14,7 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import enums.MessageType;
 import enums.Operator;
 
 /**
@@ -45,7 +47,7 @@ public class XMLParser {
 			// get list of SDs
 			NodeList SDList = root.getElementsByTagName("sequenceDiagram");
 			if (SDList != null && SDList.getLength() > 0)
-				sequenceDiagram = parseSequenceDiagram(SDList.item(0));
+				sequenceDiagram = parseSequenceDiagram((Element) SDList.item(0));
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -132,7 +134,7 @@ public class XMLParser {
 		NodeList xmlMessageEvents = xmlElement.getElementsByTagName("messageEvent");
 		if (xmlMessageEvents != null && xmlMessageEvents.getLength() > 0) {
 			for (int i = 0; i < xmlMessageEvents.getLength(); i++) {
-				lifeline.oses.add(parseMessageEvent((Element) xmlMessageEvents.item(i), lifeline.name));
+				lifeline.oses.add(parseOS((Element) xmlMessageEvents.item(i), lifeline));
 			}
 		} else
 			System.err.println("parsLifeline(): No messages found for lifeline " + lifeline.name);
@@ -141,7 +143,8 @@ public class XMLParser {
 	}
 
 	/**
-	 * Parses a CF from an xml element.
+	 * Parses a CF from an xml element. Lifelines MUST be parsed before calling
+	 * parseCF().
 	 * 
 	 * @param xmlElement
 	 *            Element representing the combined fragment in xml
@@ -157,7 +160,7 @@ public class XMLParser {
 			// values in xmlLifelines
 			Lifeline currentLifeline = sequenceDiagram.getLifeline(xmlLifelines.item(i).getNodeValue());
 			if (currentLifeline != null)
-				cf.lifelines.add(currentLifeline);
+				lifelines.add(currentLifeline);
 			else
 				System.err.println("parseCF(): Lifeline (" + xmlLifelines.item(i).getNodeValue()
 						+ ") not found in parsed SD object.");
@@ -167,8 +170,60 @@ public class XMLParser {
 		List<Operand> operands = new ArrayList<Operand>();
 		NodeList xmlOperands = xmlElement.getElementsByTagName("operand");
 		for (int i = 0; i < xmlOperands.getLength(); i++)
-			cf.operands.add(parseOperand((Element) xmlOperands.item(i), cf.lifelines));
+			operands.add(parseOperand((Element) xmlOperands.item(i), lifelines));
 
 		return new CF(Operator.getOperator(xmlElement.getAttribute("operator")), lifelines, operands);
+	}
+
+	/**
+	 * Parses OS from xml messageEvent. ALL messageEvents in xml file are of
+	 * MessageType SEND. RECEIVE OSes are calculated in composeLifeline().
+	 * 
+	 * @param xmlElement
+	 *            Element representing the messageEvent in xml.
+	 * @param lifeline
+	 *            Lifeline to which the OS belongs to.
+	 * @return OS portion of messageEvent belonging to lifeline.
+	 */
+	private static OS parseOS(Element xmlElement, Lifeline lifeline) {
+		return new OS(lifeline, sequenceDiagram.getLifeline(xmlElement.getAttribute("receiver")),
+				xmlElement.getAttribute("name"), Integer.parseInt(xmlElement.getAttribute("number")), OSType.RECEIVE,
+				MessageType.getMessageType(xmlElement.getAttribute("type")));
+	}
+
+	/**
+	 * Parses Operand from xml operand. Lifelines MUST be parsed before calling
+	 * parseOperand().
+	 * 
+	 * @param xmlElement
+	 *            Element representing the operand in xml.
+	 * @param lifelines
+	 *            Lifelines which take part of this Operand. These lifelines are
+	 *            shared with the CF to which this Operand belongs to.
+	 * @return Operand object.
+	 */
+	private static Operand parseOperand(Element xmlElement, ArrayList<Lifeline> lifelines) {
+		// find combined fragments if they exist
+		List<CF> combinedFragments = new ArrayList<CF>();
+		NodeList xmlCombinedFragments = xmlElement.getElementsByTagName("combinedFragment");
+		if (xmlCombinedFragments != null && xmlCombinedFragments.getLength() > 0)
+			for (int i = 0; i < xmlCombinedFragments.getLength(); i++)
+				combinedFragments.add(parseCF((Element) xmlCombinedFragments.item(i)));
+
+		// find messageEvents
+		List<Integer> msgNums = new ArrayList<Integer>();
+		NodeList xmlMsgEvents = xmlElement.getElementsByTagName("messageEvents");
+		if (xmlMsgEvents != null && xmlMsgEvents.getLength() > 0) {
+			for (int i = 0; i < xmlMsgEvents.getLength(); i++)
+				msgNums.add(Integer.parseInt(xmlMsgEvents.item(i).getNodeValue()));
+			Collections.sort(msgNums);
+		}
+
+		// create Constraint
+		Element xmlConstraint = (Element) xmlElement.getElementsByTagName("condition").item(0);
+		Constraint constraint = new Constraint(xmlConstraint.getAttribute("name"), sequenceDiagram.getLifeline(xmlConstraint
+				.getAttribute("lifeline")));
+
+		return new Operand(constraint, new ArrayList<Lifeline>(lifelines), msgNums);
 	}
 }

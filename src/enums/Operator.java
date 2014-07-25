@@ -5,7 +5,9 @@ public enum Operator {
 	
 	/**
 	 * Returns appropriate Operator corresponding to op.
-	 * @param op String value of operator.
+	 * 
+	 * @param op
+	 *            String value of operator.
 	 * @return Operator value.
 	 */
 	public static Operator getOperator(String op) {
