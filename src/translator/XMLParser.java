@@ -13,6 +13,8 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
+import enums.Operator;
+
 /**
  * 
  * @author Rocky Slavin
@@ -23,6 +25,7 @@ import org.w3c.dom.NodeList;
  */
 public class XMLParser {
 	private static SD sequenceDiagram;
+	private static int cfNum = 0; // TODO is this necessary?
 
 	/**
 	 * Parses file into dom and normalizes, then calls parseSequenceDiagram() to
@@ -70,15 +73,17 @@ public class XMLParser {
 				if (lfe.getElementsByTagName("type") != null)
 					lifelines.add(parseLifeline(lfe));
 			}
-		}
+		} else
+			System.err.println("parseSequenceDiagram(): no lifelines found");
 
 		// populate combined fragment list
 		NodeList cfNodes = xmlElement.getElementsByTagName("combinedFragment");
 		if (cfNodes != null && cfNodes.getLength() > 0) {
 			cfs = new ArrayList<CF>();
 			for (int i = 0; i < cfNodes.getLength(); i++)
-				cfs.add(parseCombinedFragment(cfNodes.item(i)));
-		}
+				cfs.add(parseCF((Element) cfNodes.item(i)));
+		} else
+			System.err.println("parseSequenceDiagram(): no combined fragments found");
 
 		// create SD object
 		SD sequenceDiagram = new SD(xmlElement.getAttribute("name"), lifelines, cfs);
@@ -113,10 +118,11 @@ public class XMLParser {
 	}
 
 	/**
-	 * Parses a lifeline from an xml element. Iterates through all messages
+	 * Parses a Lifeline from an xml element. Iterates through all messages
 	 * belonging to the lifeline and extracts OSes.
 	 * 
-	 * @param xmlElement Element representing the Lifeline in xml
+	 * @param xmlElement
+	 *            Element representing the Lifeline in xml
 	 * @return Lifeline object
 	 */
 	private static Lifeline parseLifeline(Element xmlElement) {
@@ -128,7 +134,41 @@ public class XMLParser {
 			for (int i = 0; i < xmlMessageEvents.getLength(); i++) {
 				lifeline.oses.add(parseMessageEvent((Element) xmlMessageEvents.item(i), lifeline.name));
 			}
-		}
+		} else
+			System.err.println("parsLifeline(): No messages found for lifeline " + lifeline.name);
+
 		return lifeline;
+	}
+
+	/**
+	 * Parses a CF from an xml element.
+	 * 
+	 * @param xmlElement
+	 *            Element representing the combined fragment in xml
+	 * @return CF object
+	 */
+	private static CF parseCF(Element xmlElement) {
+		// get Lifelines; parseCF MUST be called after Lifelines have been
+		// parsed.
+		List<Lifeline> lifelines = new ArrayList<Lifeline>();
+		NodeList xmlLifelines = xmlElement.getElementsByTagName("lifelines");
+		for (int i = 0; i < xmlLifelines.getLength(); i++) {
+			// find Lifelines in sequenceDiagram that corresponds to the name
+			// values in xmlLifelines
+			Lifeline currentLifeline = sequenceDiagram.getLifeline(xmlLifelines.item(i).getNodeValue());
+			if (currentLifeline != null)
+				cf.lifelines.add(currentLifeline);
+			else
+				System.err.println("parseCF(): Lifeline (" + xmlLifelines.item(i).getNodeValue()
+						+ ") not found in parsed SD object.");
+		}
+
+		// get Operands
+		List<Operand> operands = new ArrayList<Operand>();
+		NodeList xmlOperands = xmlElement.getElementsByTagName("operand");
+		for (int i = 0; i < xmlOperands.getLength(); i++)
+			cf.operands.add(parseOperand((Element) xmlOperands.item(i), cf.lifelines));
+
+		return new CF(Operator.getOperator(xmlElement.getAttribute("operator")), lifelines, operands);
 	}
 }

@@ -19,4 +19,10 @@ public class CF {
 	public List<CEU> ceuList;
 	public List<OS> oses;
 
+	public CF(Operator operator, List<Lifeline> lifelines, List<Operand> operands) {
+		this.operator = operator;
+		this.lifelines = lifelines;
+		this.operands = operands;
+	}
+
 }
