@@ -76,9 +76,8 @@ public class XMLParser {
 		NodeList cfNodes = xmlElement.getElementsByTagName("combinedFragment");
 		if (cfNodes != null && cfNodes.getLength() > 0) {
 			cfs = new ArrayList<CF>();
-			for (int i = 0; i < cfNodes.getLength(); i++) {
+			for (int i = 0; i < cfNodes.getLength(); i++)
 				cfs.add(parseCombinedFragment(cfNodes.item(i)));
-			}
 		}
 
 		// create SD object
@@ -95,17 +94,16 @@ public class XMLParser {
 			}
 		}
 		for (Lifeline curLifeline : lifelines) {
-			for (OS curOS : curLifeline.oses) {
+			for (OS curOS : curLifeline.oses)
 				if (curOS.osType == OSType.SEND)
 					allMessages.add(curOS);
-			}
 		}
 
 		// remove from allMessages any messages that appear in AllCFMsg
 		// TODO not sure about this
-		allMessages.removeAll(AllCFMsg(sequenceDiagram.osesInCFs())); 
-		
-		// TODO sequenceDiagram.osesInCFs =
+		allMessages.removeAll(AllCFMsg(sequenceDiagram.osesInCFs()));
+
+		// TODO refactor break2Alt()
 		// break2Alt(sequenceDiagram.osesInCFs(), allMessages);
 		sequenceDiagram.lifelines = composeLifeline(sequenceDiagram.lifelines);
 		sequenceDiagram.lifelines = composeEU(sequenceDiagram.lifelines, sequenceDiagram.cfs);
@@ -114,5 +112,23 @@ public class XMLParser {
 		return sequenceDiagram;
 	}
 
+	/**
+	 * Parses a lifeline from an xml element. Iterates through all messages
+	 * belonging to the lifeline and extracts OSes.
+	 * 
+	 * @param xmlElement Element representing the Lifeline in xml
+	 * @return Lifeline object
+	 */
+	private static Lifeline parseLifeline(Element xmlElement) {
+		Lifeline lifeline = new Lifeline(xmlElement.getAttribute("roleName"), xmlElement.getAttribute("type"));
 
+		// parse OSes from messageEvent xml tags belonging to the Lifeline
+		NodeList xmlMessageEvents = xmlElement.getElementsByTagName("messageEvent");
+		if (xmlMessageEvents != null && xmlMessageEvents.getLength() > 0) {
+			for (int i = 0; i < xmlMessageEvents.getLength(); i++) {
+				lifeline.oses.add(parseMessageEvent((Element) xmlMessageEvents.item(i), lifeline.name));
+			}
+		}
+		return lifeline;
+	}
 }
