@@ -1,14 +1,7 @@
 package sdComponents;
 
 import java.util.List;
-
-enum OSType {
-	SEND, RECEIVE
-};
-
-enum MessageType {
-	SYNC, ASYNC
-};
+import enums.*;
 
 /**
  * 

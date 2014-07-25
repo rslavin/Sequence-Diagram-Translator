@@ -1,6 +1,7 @@
 package sdComponents;
 
 import java.util.List;
+import enums.Operator;
 
 /**
  * 

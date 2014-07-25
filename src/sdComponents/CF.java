@@ -1,11 +1,7 @@
 package sdComponents;
 
 import java.util.List;
-
-//enumerated operators
-enum Operator {
-	ALT, OPT, PAR, LOOP, ASSERT, NEG, WEAK
-};
+import enums.Operator;
 
 /**
  * 

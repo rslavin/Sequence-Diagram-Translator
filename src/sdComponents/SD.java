@@ -12,6 +12,15 @@ import java.util.List;
 public class SD {
 	public String name;
 	public List<Lifeline> lifelines;
-	public List<CF> cfs;
+	public List<OS> osesInCFs; // TODO is this correct? Should it be CFs?
+	
+	public SD(String name, List<Lifeline> lifelines, List<CF> cfs) {
+		super();
+		this.name = name;
+		this.lifelines = lifelines;
+		this.cfs = cfs;
+	}
+	
+	
 
 }
