@@ -26,8 +26,7 @@ public class XMLParser {
 
 	/**
 	 * Parses file into dom and normalizes, then calls parseSequenceDiagram() to
-	 * begin creation of sequence diagram components. sequence diagram
-	 * components.
+	 * begin creation of sequence diagram components.
 	 * 
 	 * @param file
 	 *            xml file containing sequence diagram
