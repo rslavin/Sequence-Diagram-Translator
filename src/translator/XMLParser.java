@@ -264,16 +264,30 @@ public class XMLParser {
 		} else
 			System.err.println("composeLifeline: null Lifeline list.)");
 	}
-	
-	private static void composeEU(){
-		for(Lifeline lifeline : sequenceDiagram.lifelines)
-			findMsginEU(lifeline, 0); // TODO change prototype (curLifeline, layer)
-		
-		for(Lifeline outerLifeline : sequenceDiagram.lifelines){
-			for(Lifeline innerLifeline : sequenceDiagram.lifelines){
-				if(outerLifeline.receivesFrom(innerLifeline))
-			}
-		}
-		
+
+	/**
+	 * Calls findMsginEU() for each Lifeline. Assigns connectedParents for all
+	 * OSes. Lifelines MUST be parsed before calling composeEU().
+	 */
+	private static void composeEU() {
+		for (Lifeline lifeline : sequenceDiagram.lifelines)
+			findMsginEU(lifeline, 0); // TODO change prototype (curLifeline,
+										// layer)
+
+		// TODO unsure about connectedParents
+		for (Lifeline outerLifeline : sequenceDiagram.lifelines)
+			for (OS outerOS : outerLifeline.oses)
+				// check each other Lifeline
+				for (Lifeline innerLifeline : sequenceDiagram.lifelines)
+					// if the OS is connected to a Lifeline
+					if (outerOS.connectedLifeline.equals(innerLifeline))
+						// look the message(s) in the second Lifeline that make
+						// the connection
+						for (OS innerOS : innerLifeline.oses)
+							if (outerOS.number == innerOS.number)
+								// assign its parents as connected Parents to
+								// the first OS
+								outerOS.connectedParents = new ArrayList<String>(innerOS.parents);
+
 	}
 }

@@ -73,7 +73,7 @@ public class Lifeline {
 	 *            Lifeline to check if is connected.
 	 * @return true if connected, false otherwise.
 	 */
-	public boolean connectedTo(Lifeline otherLifeline) {
+	public boolean isConnected(Lifeline otherLifeline) {
 		for (OS os : oses)
 			if (os.connectedLifeline.equals(otherLifeline))
 				return true;
