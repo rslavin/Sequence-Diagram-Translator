@@ -231,7 +231,8 @@ public class XMLParser {
 
 	/**
 	 * Adds receiving OSes to the Lifelines by iterating through other
-	 * Lifelines.
+	 * Lifelines. Lifelines MUST be parsed before calling
+	 * generateReceivingOSes().
 	 * 
 	 * @param oldLifelines
 	 *            Current List of Lifelines without receiving OSes.
@@ -240,27 +241,39 @@ public class XMLParser {
 	private static void generateReceivingOSes() {
 		if (sequenceDiagram.lifelines != null && sequenceDiagram.lifelines.size() > 0) {
 			// for each lifeline
-			for (Lifeline oldLifeline : sequenceDiagram.lifelines) {
+			for (Lifeline outerLifeline : sequenceDiagram.lifelines) {
 				// check all other lifelines
-				for (Lifeline iterLifeline : sequenceDiagram.lifelines) {
+				for (Lifeline innerLifeline : sequenceDiagram.lifelines) {
 					// check other lifelines to see if they send a message to
 					// this lifeline
-					for (OS os : iterLifeline.oses) {
+					for (OS os : innerLifeline.oses) {
 						// if so, create a receiving OS on this lifeline
-						if (os.connectedLifeline.equals(oldLifeline))
-							oldLifeline.oses.add(new OS(oldLifeline, iterLifeline, os.name, os.number, OSType.RECEIVE,
+						if (os.connectedLifeline.equals(outerLifeline))
+							outerLifeline.oses.add(new OS(outerLifeline, innerLifeline, os.name, os.number, OSType.RECEIVE,
 									os.messageType));
 					}
 				}
 				// reorder OSes to integrate new receiving OSes
-				Collections.sort(oldLifeline.oses, new OSComparator());
+				Collections.sort(outerLifeline.oses, new OSComparator());
 				// TODO not sure why this is done
-				oldLifeline.directedOSes = new ArrayList<OS>(oldLifeline.oses);
+				outerLifeline.directedOSes = new ArrayList<OS>(outerLifeline.oses);
 				// TODO not sure why this is done
-				for (int i = 1; i < oldLifeline.oses.size() + 1; i++)
-					oldLifeline.oses.get(i).location = i;
+				for (int i = 1; i < outerLifeline.oses.size() + 1; i++)
+					outerLifeline.oses.get(i).location = i;
 			}
 		} else
 			System.err.println("composeLifeline: null Lifeline list.)");
+	}
+	
+	private static void composeEU(){
+		for(Lifeline lifeline : sequenceDiagram.lifelines)
+			findMsginEU(lifeline, 0); // TODO change prototype (curLifeline, layer)
+		
+		for(Lifeline outerLifeline : sequenceDiagram.lifelines){
+			for(Lifeline innerLifeline : sequenceDiagram.lifelines){
+				if(outerLifeline.receivesFrom(innerLifeline))
+			}
+		}
+		
 	}
 }

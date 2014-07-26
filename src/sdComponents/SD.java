@@ -44,8 +44,8 @@ public class SD {
 			if (lifeline.name.equals(name))
 				return lifeline;
 		}
-		System.err.println("getLifeline(): \""+ name +"\" does not correspond to an instantiated Lifeline.");
+		System.err.println("getLifeline(): \"" + name + "\" does not correspond to an instantiated Lifeline.");
 		return null;
-	}
+	}	
 
 }
