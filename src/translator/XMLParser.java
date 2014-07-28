@@ -342,6 +342,10 @@ public class XMLParser {
 		}
 	}
 	
-
+	private static projectCF2Lifelines(){
+		for(Lifeline lifeline : sequenceDiagram.lifelines){
+			lifeline.directedCEUs = projectCF2Lifeline(lifeline); // maybe pass some more things
+			lifeline.
+		}
 	}
 }
