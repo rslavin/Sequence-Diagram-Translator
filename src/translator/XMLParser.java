@@ -115,7 +115,7 @@ public class XMLParser {
 		// TODO refactor break2Alt()
 		// break2Alt(sequenceDiagram.osesInCFs(), allMessages);
 		generateReceivingOSes();
-		sequenceDiagram.lifelines = composeEU(sequenceDiagram.lifelines, sequenceDiagram.cfs);
+		composeEU();
 		sequenceDiagram.lifelines = projectCF2LifelineList(sequenceDiagram.lifelines, sequenceDiagram.cfs);
 
 		return sequenceDiagram;
@@ -266,13 +266,18 @@ public class XMLParser {
 	}
 
 	/**
-	 * Calls findMsginEU() for each Lifeline. Assigns connectedParents for all
-	 * OSes. Lifelines MUST be parsed before calling composeEU().
+	 * Calls findMsginEU() for each Lifeline in order to assign connectedParents
+	 * to OSes. connectedParents and parents are important for mapping LTL
+	 * formula variables to NuSMV model modules. Assigns connectedParents for
+	 * all OSes. Lifelines MUST be parsed before calling composeEU().
 	 */
 	private static void composeEU() {
 		for (Lifeline lifeline : sequenceDiagram.lifelines)
-			findMsginEU(lifeline, 0); // TODO change prototype (curLifeline,
-										// layer)
+			findMsgInEU(lifeline, sequenceDiagram.cfs, 0, new ArrayList<String>()); // TODO
+																					// change
+																					// prototype
+																					// (curLifeline,
+		// layer)
 
 		// TODO unsure about connectedParents
 		for (Lifeline outerLifeline : sequenceDiagram.lifelines)
@@ -288,6 +293,55 @@ public class XMLParser {
 								// assign its parents as connected Parents to
 								// the first OS
 								outerOS.connectedParents = new ArrayList<String>(innerOS.parents);
+
+	}
+
+	/**
+	 * Recursively adds parents to lifelines. findMsgInEU is important for
+	 * mapping LTL formula variables to NuSMV modules.
+	 * 
+	 * @param lifeline
+	 *            A single Lifeline. Generally, this should be called for all
+	 *            lifelines.
+	 * @param combinedFragments
+	 *            Should be all combined fragments for initial call.
+	 * @param layer
+	 *            Should be 0 for initial call.
+	 * @param parents
+	 *            Should be empty for initial call.
+	 */
+	private static void findMsgInEU(Lifeline lifeline, List<CF> combinedFragments, int layer, List<String> parents) {
+		// for each CF
+		for (int i = 0; i < combinedFragments.size(); i++) {
+			CF cf = combinedFragments.get(i);
+			// check if the cf contains lifeline
+			if (cf.lifelines.contains(lifeline)) {
+				// if so, check each OS in the lifeline
+				for (OS lifelineOS : lifeline.oses) {
+					for (int j = 0; j < cf.operands.size(); j++) {
+						Operand cfOperand = cf.operands.get(j);
+						// recursion occurs here
+						int newLayer = layer + 1;
+						List<String> newParents = new ArrayList<String>(parents);
+						String parentCF = cf.operator.toString() + (i + 1) + "_" + lifeline.name;
+						newParents.add(parentCF);
+						String parentOperand = cf.operator.toString() + (i + 1) + "_op" + (j + 1) + "_" + lifeline.name;
+						newParents.add(parentOperand);
+						for (Integer opMsgNum : cfOperand.msgNums) {
+							if (lifelineOS.number == opMsgNum) {
+								lifelineOS.parents = new ArrayList<String>(newParents);
+								lifelineOS.layer = layer;
+								lifeline.directedOSes.remove(lifelineOS);
+								break;
+							}
+						}
+						findMsgInEU(lifeline, cfOperand.cfs, newLayer, newParents);
+					}
+				}
+			}
+		}
+	}
+	
 
 	}
 }
