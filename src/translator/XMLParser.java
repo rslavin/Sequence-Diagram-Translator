@@ -116,7 +116,7 @@ public class XMLParser {
 		// break2Alt(sequenceDiagram.osesInCFs(), allMessages);
 		generateReceivingOSes();
 		composeEU();
-		sequenceDiagram.lifelines = projectCF2LifelineList(sequenceDiagram.lifelines, sequenceDiagram.cfs);
+		projectCFToLifelines();
 
 		return sequenceDiagram;
 	}
@@ -341,11 +341,34 @@ public class XMLParser {
 			}
 		}
 	}
-	
-	private static projectCF2Lifelines(){
-		for(Lifeline lifeline : sequenceDiagram.lifelines){
-			lifeline.directedCEUs = projectCF2Lifeline(lifeline); // maybe pass some more things
-			lifeline.
+
+	/**
+	 * Associates relevant information to lifelines for combined fragment
+	 * projection.
+	 */
+	private static void projectCFToLifelines() {
+		List<CEU> allCEUs = new ArrayList<CEU>();
+		for (Lifeline lifeline : sequenceDiagram.lifelines) {
+			lifeline.directedCEUs = projectCFToLifeline(lifeline);
+			lifeline.orderedElements = buildOrdered(lifeline.directedOSes, lifeline.directedCEUs);
+			lifeline.states = buildStates(lifeline.orderedElements);
+
+			allCEUs.addAll(lifeline.directedCEUs);
+
+			buildCondList(lifeline.directedCEUs, new ArrayList<Ordered>());
+			lifeline.directedCEUs = considerToIgnore(lifeline.directedCEUs);
+		}
+
+		buildConnectedEUList();
+		buildIteration();
+
+		for (Lifeline lifeline : sequenceDiagram.lifelines) {
+			// add connectedLifelines (all?)
+			for (Lifeline connectedLifeline : sequenceDiagram.lifelines)
+				if (!lifeline.equals(connectedLifeline)) // TODO correct?
+					lifeline.connectedLifelines.add(connectedLifeline);
+			lifeline.criticals = buildCriticalList(lifeline.directedCEUs, new ArrayList<EU>());
+			lifeline.assertions = buildAssertionList(lifeline.assertions, new ArrayList<EU>());
 		}
 	}
 }
