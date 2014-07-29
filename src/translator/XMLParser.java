@@ -258,8 +258,8 @@ public class XMLParser {
 				// TODO not sure why this is done
 				outerLifeline.directedOSes = new ArrayList<OS>(outerLifeline.oses);
 				// TODO not sure why this is done
-				for (int i = 1; i < outerLifeline.oses.size() + 1; i++)
-					outerLifeline.oses.get(i).location = i;
+				for (int i = 0; i < outerLifeline.oses.size(); i++)
+					outerLifeline.oses.get(i).location = i + 1;
 			}
 		} else
 			System.err.println("composeLifeline: null Lifeline list.)");
@@ -349,7 +349,8 @@ public class XMLParser {
 	private static void projectCFToLifelines() {
 		List<CEU> allCEUs = new ArrayList<CEU>();
 		for (Lifeline lifeline : sequenceDiagram.lifelines) {
-			lifeline.directedCEUs = projectCFToLifeline(lifeline);
+			lifeline.directedCEUs = generateCEUs(lifeline, (ArrayList<CF>) sequenceDiagram.cfs, new ArrayList<String>(),
+					new ArrayList<CEU>());
 			lifeline.orderedElements = buildOrdered(lifeline.directedOSes, lifeline.directedCEUs);
 			lifeline.states = buildStates(lifeline.orderedElements);
 
@@ -370,5 +371,103 @@ public class XMLParser {
 			lifeline.criticals = buildCriticalList(lifeline.directedCEUs, new ArrayList<EU>());
 			lifeline.assertions = buildAssertionList(lifeline.assertions, new ArrayList<EU>());
 		}
+	}
+
+	/**
+	 * Generates CEUs for lifeline.
+	 * 
+	 * @param lifeline
+	 *            Lifeline to generate CEUs for.
+	 * @param combinedFragments
+	 *            All CFs for initial call. Recursive calls modify this for
+	 *            nested CFs.
+	 * @param parents
+	 *            Labels for parents of nested CEUs. Empty for first call.
+	 * @param ceuParents
+	 *            Labels for Operand parent CEUs Empty for first call.
+	 * @return
+	 */
+	private static ArrayList<CEU> generateCEUs(Lifeline lifeline, ArrayList<CF> combinedFragments, ArrayList<String> parents,
+			ArrayList<CEU> ceuParents) {
+
+		ArrayList<CEU> lifelineCEUs = new ArrayList<CEU>();
+		for (CF cf : combinedFragments) {
+			// find each instance of lifeline in all CFs
+			for (Lifeline cfLifeline : cf.lifelines) {
+				// create ceu projection onto lifeline
+				if (cfLifeline.equals(lifeline)) {
+					CEU ceu = new CEU(cf);
+					cf.ceus.add(ceu);
+					ceu.lifeline = cfLifeline;
+					ceu.name = cf.operator.toString() + cf.num + "_" + cfLifeline.name;
+
+					// add coveredLifelineNames to CEU
+					for (Lifeline cfCoveredLifeline : cf.lifelines) {
+						if (cfCoveredLifeline != cfLifeline) { // skip this
+																// lifeline
+							if (parents.size() == 0)
+								ceu.coveredLifelineNames.add(cfCoveredLifeline.name);
+							else
+								ceu.coveredLifelineNames.add(cf.operator.toString() + cf.num + "_" + cfCoveredLifeline.name);
+						}
+					}
+
+					// add prefix for next recurse
+					parents.add(cf.operator.toString() + cf.num + "_");
+
+					// add parent prefix to covered lifeline names
+					for (Lifeline cfCoveredLifeline : cf.lifelines) {
+						if (cfCoveredLifeline != cfLifeline) // skip this
+																// lifeline
+							ceu.coveredLifelineNames.add(parents.get(parents.size() - 1) + cfCoveredLifeline.name);
+					}
+
+					for (int i = 0; i < cf.operands.size(); i++) {
+						Operand cfOperand = cf.operands.get(i);
+						cfOperand.constraint.num = i + 1;
+						ceu.coveredConstraints.add(cfOperand.constraint);
+						// create new EU
+						EU eu = new EU();
+						eu.operand = cfOperand;
+						eu.lifeline = cfLifeline;
+						eu.name = cf.operator.toString() + cf.num + "_op" + (i + 1) + "_" + cfLifeline.name;
+						eu.operand.constraint.euLabel = cf.operator.toString() + cf.num + "_"
+								+ eu.operand.constraint.lifeline.name + ".op" + (i + 1);
+
+						parents.add("op" + (i + 1) + "_");
+
+						for (Lifeline cfCoveredLifeline : cf.lifelines)
+							if (cfCoveredLifeline != cfLifeline)
+								eu.coveredEULabels.add(parents.get(parents.size() - 2) + parents.get(parents.size() - 1)
+										+ cfCoveredLifeline.name);
+
+						for (int msgNum : cfOperand.msgNums) {
+							for (OS os : cfLifeline.oses) {
+								if (os.number == msgNum) {
+									eu.directedOSes.add(os);
+									break;
+								}
+							}
+						}
+
+						// handle nested cfs
+						if (cfOperand.cfs.size() > 0) {
+							List<CEU> opParentCEUs = new ArrayList<CEU>();
+							opParentCEUs.add(ceu);
+							eu.directedCEUs = generateCEUs(cfLifeline, (ArrayList<CF>) cfOperand.cfs, parents,
+									(ArrayList<CEU>) opParentCEUs);
+						}
+						ceu.eus.add(eu);
+						cfOperand.eus.add(eu);
+						parents.remove(parents.size() - 1);
+					}
+					cf.ceus.add(ceu);
+					lifelineCEUs.add(ceu);
+					parents.remove(parents.size() - 1);
+					break;
+				}
+			}
+		}
+		return lifelineCEUs;
 	}
 }
