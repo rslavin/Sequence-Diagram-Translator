@@ -470,4 +470,62 @@ public class XMLParser {
 		}
 		return lifelineCEUs;
 	}
+
+	/**
+	 * Generates pre and post OS information.
+	 * 
+	 * @param oses
+	 *            ArrayList of OSes (subclass of Ordered).
+	 * @param ceus
+	 *            ArrayList of CEUs (subclass of Ordered).
+	 * @return Combined ArrayList of oses and ceus in order with elements
+	 *         associated with relevant pre and post Ordereds.
+	 */
+	private static ArrayList<Ordered> buildOrderedList(ArrayList<OS> oses, ArrayList<CEU> ceus) {
+		ArrayList<Ordered> ordereds = new ArrayList<Ordered>(oses);
+		// add ceus to ordered in order
+		for (CEU ceu : ceus) {
+			if (ordereds.size() == 0)
+				ordereds.add(ceu);
+			else {
+				for (int i = 0; i < ordereds.size(); i++) {
+					Ordered ord = ordereds.get(i);
+					if (i == ordereds.size() - 1)
+						ordereds.add(ceu);
+					else if (ord instanceof OS) {
+						OS tempOS = (OS) ord;
+						if (ceu.getFirstOS().number < tempOS.number) {
+							ordereds.add(i, ceu);
+							break;
+						}
+					} else { // CEU
+						CEU tempCEU = (CEU) ord;
+						if (ceu.getFirstOS().number < tempCEU.getFirstOS().number) {
+							ordereds.add(i, ceu);
+							break;
+						}
+					}
+				}
+			}
+			for (EU ceuEU : ceu.eus)
+				ceuEU.orderds = buildOrderedList((ArrayList<OS>) ceuEU.directedOSes, (ArrayList<CEU>) ceuEU.directedCEUs);
+		}
+		// generate pre and post Ordereds for ordereds list
+		if (ordereds.size() > 1) {
+			for (int i = 0; i < ordereds.size(); i++) {
+				Ordered ord = ordereds.get(i);
+				if (ord instanceof CEU) {
+					if (i == 0) // first
+						ord.postOrdereds.add(ordereds.get(i + 1));
+					else if (i == ordereds.size() - 1)
+						ord.preOrdereds.add(ordereds.get(i - 1));
+					else if (ordereds.size() > 2) {
+						ord.preOrdereds.add(ordereds.get(i - 1));
+						ord.postOrdereds.add(ordereds.get(i + 1));
+					}
+				}
+			}
+		}
+		return ordereds;
+	}
 }
