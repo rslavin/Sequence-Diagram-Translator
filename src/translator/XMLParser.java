@@ -360,7 +360,7 @@ public class XMLParser {
 			lifeline.directedCEUs = considerToIgnore(lifeline.directedCEUs);
 		}
 
-		buildConnectedEUList();
+		buildConnectedEUs((ArrayList<CF>) sequenceDiagram.cfs);
 		buildIteration();
 
 		for (Lifeline lifeline : sequenceDiagram.lifelines) {
@@ -553,4 +553,51 @@ public class XMLParser {
 		return states;
 	}
 
+	/**
+	 * Builds connected EUs for cfs and nested cfs.
+	 * 
+	 * @param cfs
+	 *            List of CFs to build connected EUs.
+	 */
+	private static void buildConnectedEUs(ArrayList<CF> cfs) {
+		for (CF cf : cfs) {
+			// connect CEUs
+			for (CEU cfCEU : cf.ceus)
+				for (CEU cfCEU2 : cf.ceus)
+					if (!cfCEU.equals(cfCEU2))
+						if (cfCEU.cf.num == cfCEU2.cf.num)
+							cfCEU.connectedCEUs.add(cfCEU2);
+
+			// connect EUs
+			for (CEU cfCEU : cf.ceus)
+				for (int i = 0; i < cfCEU.eus.size(); i++) {
+					EU ceuEU = cfCEU.eus.get(i);
+					for (CEU connectedCEU : cfCEU.connectedCEUs)
+						ceuEU.connectedEUs.add(connectedCEU.eus.get(i));
+				}
+
+			for (Operand op : cf.operands)
+				buildConnectedEUs((ArrayList<CF>) op.cfs);
+		}
+	}
+
+	/**
+	 * Propogates constraints to OSes
+	 * 
+	 * @param ceus
+	 *            List of CEUs to propagate constraints for.
+	 * @param parentConstraints
+	 *            Parent constraints to propagate.
+	 */
+	private static void buildConstraintList(ArrayList<CEU> ceus, ArrayList<Constraint> parentConstraints) {
+		for (CEU ceu : ceus) {
+			for (EU ceuEU : ceu.eus) {
+				ArrayList<Constraint> euCons = new ArrayList<Constraint>(parentConstraints);
+				euCons.add(ceuEU.getConstraint());
+				for (OS euOS : ceuEU.directedOSes)
+					euOS.constraints = new ArrayList<Constraint>(euCons);
+				buildConstraintList((ArrayList<CEU>) ceuEU.directedCEUs, euCons);
+			}
+		}
+	}
 }
