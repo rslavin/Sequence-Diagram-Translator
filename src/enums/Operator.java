@@ -2,7 +2,7 @@ package enums;
 
 public enum Operator {
 	ALT, OPT, PAR, LOOP, ASSERT, NEG, WEAK, CRIT, STRICT, CONS, IGNORE;
-	
+
 	/**
 	 * Returns appropriate Operator corresponding to op.
 	 * 
@@ -33,8 +33,36 @@ public enum Operator {
 			return CONS;
 		else if (op.equals("ignore"))
 			return IGNORE;
-		else{
-			System.err.println("getOperator(): \""+ op + "\" does not correspond to a valid Operator.");
+		else {
+			System.err.println("getOperator(): \"" + op + "\" does not correspond to a valid Operator.");
+			return null;
+		}
+	}
+
+	public String toString() {
+		switch (this) {
+		case ALT:
+			return "alt";
+		case OPT:
+			return "opt";
+		case LOOP:
+			return "loop";
+		case ASSERT:
+			return "assert";
+		case NEG:
+			return "neg";
+		case WEAK:
+			return "weak";
+		case CRIT:
+			return "crit";
+		case STRICT:
+			return "strict";
+		case CONS:
+			return "cons";
+		case IGNORE:
+			return "ignore";
+		default:
+			System.err.println("Error converting Operator to string.");
 			return null;
 		}
 	}

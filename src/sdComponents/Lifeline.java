@@ -19,6 +19,10 @@ public class Lifeline {
 	public List<OS> directedOSes;
 	public List<CEU> directedCEUs;
 	public List<Lifeline> connectedLifelines;
+	public List<Ordered> orderedElements;
+	public List<String> states;
+	public List<EU> criticals;
+	public List<EU> assertions;
 
 	public Lifeline(String name, String type) {
 		this.name = name;

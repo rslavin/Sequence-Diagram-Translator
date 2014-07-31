@@ -1,6 +1,8 @@
 package sdComponents;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import enums.Operator;
 
 /**
@@ -16,13 +18,19 @@ public class CF {
 	public List<Lifeline> lifelines;
 	public List<Operand> operands;
 	public OS firstOS; // was "int firstMsgNum"
-	public List<CEU> ceuList;
+	public List<CEU> ceus;
 	public List<OS> oses;
+	public int num;
 
 	public CF(Operator operator, List<Lifeline> lifelines, List<Operand> operands) {
 		this.operator = operator;
 		this.lifelines = lifelines;
 		this.operands = operands;
+		firstOS = null;
+		ceus = new ArrayList<CEU>();
+		oses = new ArrayList<OS>();
+		num = -1;
 	}
+
 
 }
