@@ -24,6 +24,7 @@ public class OS extends Ordered {
 	public int location; // unsure what this is
 	public List<String> parents;// for use with NuSMV modules
 	public List<String> connectedParents; // for use with NuSMV modules
+	public int iteration;
 
 	public OS(Lifeline lifeline, Lifeline connectedLifeline, String name, int number, OSType osType, MessageType messageType) {
 		this.lifeline = lifeline;
@@ -32,6 +33,7 @@ public class OS extends Ordered {
 		this.number = number;
 		this.osType = osType;
 		this.messageType = messageType;
+		this.iteration = 0;
 	}
 
 	/**

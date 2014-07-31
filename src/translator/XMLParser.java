@@ -359,7 +359,7 @@ public class XMLParser {
 		}
 
 		buildConnectedEUs((ArrayList<CF>) sequenceDiagram.cfs);
-		buildIteration();
+		buildLoops((ArrayList<CF>) sequenceDiagram.cfs);
 
 		for (Lifeline lifeline : sequenceDiagram.lifelines) {
 			// add connectedLifelines (all?)
@@ -620,5 +620,52 @@ public class XMLParser {
 		for (CF cf : cfs)
 			msgNums.addAll(cf.getAllMsgNums());
 		return msgNums;
+	}
+
+	/**
+	 * Builds the necessary iterations for all LOOP combined fragments.
+	 * 
+	 * @param cfs
+	 *            List of CFs to build loops for.
+	 */
+	private static void buildLoops(ArrayList<CF> cfs) {
+		for (CF cf : cfs) {
+			if (cf.operator.equals(Operator.LOOP)) {
+				Operand cfOp = cf.operands.get(0);
+				cfOp.constraint.maxIteration = 3;
+				cfOp.constraint.minIteration = 1;
+
+				int maxIteration = cfOp.constraint.maxIteration;
+				int minIteration = cfOp.constraint.minIteration;
+
+				for (int i = 0; i < maxIteration; i++) {
+					if (i < minIteration)
+						cfOp.constraint.constraint = "true";
+
+					for (EU opEU : cfOp.eus) {
+						for (int j = 0; j < opEU.directedOSes.size(); j++) {
+							OS directedOS = opEU.directedOSes.get(j);
+							directedOS.name = directedOS.name + "[" + (i + 1) + "]";
+							directedOS.iteration = i + 1;
+							String curState = opEU.states.get(j + 1);
+							opEU.states.remove(j + 1);
+							curState = curState + "_" + (i + 1);
+							opEU.states.add(j + 1, curState);
+						}
+
+						opEU.directedCEUs = buildIterationCEU(opEU.directedCEUs, i, minIteration);
+
+						for (CEU cfCEU : cf.ceus) {
+							if (cfCEU.lifeline.equals(opEU.lifeline)) {
+								cfCEU.euIterations.add(opEU);
+								break;
+							}
+						}
+					}
+					cf.iterations.add(cfOp);
+					buildLoops((ArrayList<CF>) cfOp.cfs);
+				}
+			}
+		}
 	}
 }

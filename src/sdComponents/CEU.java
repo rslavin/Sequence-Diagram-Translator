@@ -36,7 +36,7 @@ public class CEU extends Ordered {
 	public OS firstOS; // was "int firstOSLocation"
 
 	public boolean isParentPar; // unsure
-	public List<EU> euIteration; // unsure
+	public List<EU> euIterations; // unsure
 	public List<CEU> connectedCEUs; // unsure
 
 	public CEU(CF cf) {
@@ -52,7 +52,7 @@ public class CEU extends Ordered {
 		hasCriticalChild = false;
 		firstOS = null;
 		isParentPar = false;
-		euIteration = new ArrayList<EU>();
+		euIterations = new ArrayList<EU>();
 		connectedCEUs = new ArrayList<CEU>();
 		name = null;
 	}

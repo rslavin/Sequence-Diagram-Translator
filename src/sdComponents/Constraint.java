@@ -14,6 +14,9 @@ public class Constraint {
 	public EU eu;
 	public String euLabel;
 	public int num;
+	
+	public int minIteration;
+	public int maxIteration;
 
 	public Constraint(String constraint, Lifeline lifeline) {
 		this.constraint = constraint;
