@@ -351,7 +351,7 @@ public class XMLParser {
 		for (Lifeline lifeline : sequenceDiagram.lifelines) {
 			lifeline.directedCEUs = generateCEUs(lifeline, (ArrayList<CF>) sequenceDiagram.cfs, new ArrayList<String>(),
 					new ArrayList<CEU>());
-			lifeline.orderedElements = buildOrdered(lifeline.directedOSes, lifeline.directedCEUs);
+			lifeline.orderedElements = buildOrdered((ArrayList<OS>) lifeline.directedOSes, (ArrayList<CEU>) lifeline.directedCEUs);
 			lifeline.states = buildStates(lifeline.orderedElements);
 
 			allCEUs.addAll(lifeline.directedCEUs);
@@ -481,7 +481,7 @@ public class XMLParser {
 	 * @return Combined ArrayList of oses and ceus in order with elements
 	 *         associated with relevant pre and post Ordereds.
 	 */
-	private static ArrayList<Ordered> buildOrderedList(ArrayList<OS> oses, ArrayList<CEU> ceus) {
+	private static ArrayList<Ordered> buildOrdered(ArrayList<OS> oses, ArrayList<CEU> ceus) {
 		ArrayList<Ordered> ordereds = new ArrayList<Ordered>(oses);
 		// add ceus to ordered in order
 		for (CEU ceu : ceus) {
@@ -508,7 +508,7 @@ public class XMLParser {
 				}
 			}
 			for (EU ceuEU : ceu.eus)
-				ceuEU.orderds = buildOrderedList((ArrayList<OS>) ceuEU.directedOSes, (ArrayList<CEU>) ceuEU.directedCEUs);
+				ceuEU.orderds = buildOrdered((ArrayList<OS>) ceuEU.directedOSes, (ArrayList<CEU>) ceuEU.directedCEUs);
 		}
 		// generate pre and post Ordereds for ordereds list
 		if (ordereds.size() > 1) {
@@ -528,4 +528,29 @@ public class XMLParser {
 		}
 		return ordereds;
 	}
+
+	/**
+	 * Assigns state labels for a list of ordereds.
+	 * 
+	 * @param ordereds
+	 *            Ordereds for which state labels should be generated.
+	 * @return List of labels.
+	 */
+	private static ArrayList<String> buildStateList(ArrayList<Ordered> ordereds) {
+		ArrayList<String> states = new ArrayList<String>();
+		states.add("sinit");
+
+		for (Ordered ordered : ordereds) {
+			if (ordered instanceof OS) {
+				OS os = (OS) ordered;
+				states.add(((OS) ordered).getStateLabel());
+			} else if (ordered instanceof CEU) {
+				CEU ceu = (CEU) ordered;
+				for (EU ceuEU : ceu.eus)
+					ceuEU.states = buildStateList((ArrayList<Ordered>) ceuEU.orderds);
+			}
+		}
+		return states;
+	}
+
 }
