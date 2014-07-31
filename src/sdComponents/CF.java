@@ -32,5 +32,19 @@ public class CF {
 		num = -1;
 	}
 
+	/**
+	 * Returns all message numbers from the CF and nested CFs
+	 * 
+	 * @return Total message numbers.
+	 */
+	public ArrayList<Integer> getAllMsgNums() {
+		ArrayList<Integer> msgs = new ArrayList();
+		for (Operand op : operands) {
+			msgs.addAll(op.msgNums);
+			for (CF opCF : op.cfs)
+				msgs.addAll(opCF.getAllMsgNums());
+		}
+		return msgs;
+	}
 
 }

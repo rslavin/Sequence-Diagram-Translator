@@ -65,13 +65,12 @@ public class XMLParser {
 	 * @return Returns the root sequence diagram object.
 	 */
 	private static SD parseSequenceDiagram(Element xmlElement) {
-		List<Lifeline> lifelines;
-		List<CF> cfs;
+		List<Lifeline> lifelines = new ArrayList<Lifeline>();
+		List<CF> cfs = new ArrayList<CF>();
 
 		// populate lifeline list
 		NodeList lifelineNodes = xmlElement.getElementsByTagName("lifeline");
 		if (lifelineNodes != null && lifelineNodes.getLength() > 0) {
-			lifelines = new ArrayList<Lifeline>();
 			for (int i = 0; i < lifelineNodes.getLength(); i++) {
 				Element lfe = (Element) lifelineNodes.item(i);
 				if (lfe.getElementsByTagName("type") != null)
@@ -83,7 +82,6 @@ public class XMLParser {
 		// populate combined fragment list
 		NodeList cfNodes = xmlElement.getElementsByTagName("combinedFragment");
 		if (cfNodes != null && cfNodes.getLength() > 0) {
-			cfs = new ArrayList<CF>();
 			for (int i = 0; i < cfNodes.getLength(); i++)
 				cfs.add(parseCF((Element) cfNodes.item(i)));
 		} else
@@ -93,24 +91,24 @@ public class XMLParser {
 		SD sequenceDiagram = new SD(xmlElement.getAttribute("name"), lifelines, cfs);
 
 		// generate list of sending OSes (one OS per message)
-		List<OS> allMessages = new ArrayList<OS>();
+		List<Integer> allMessages = new ArrayList<Integer>();
 		for (int i = 0; i < lifelines.size(); i++) {
 			Lifeline curLifeline = lifelines.get(i);
 			for (int j = 0; j < curLifeline.oses.size(); j++) {
 				OS curOS = curLifeline.oses.get(j);
 				if (curOS.osType == OSType.SEND)
-					allMessages.add(curOS);
+					allMessages.add(curOS.number);
 			}
 		}
 		for (Lifeline curLifeline : lifelines) {
 			for (OS curOS : curLifeline.oses)
 				if (curOS.osType == OSType.SEND)
-					allMessages.add(curOS);
+					allMessages.add(curOS.number);
 		}
 
 		// remove from allMessages any messages that appear in AllCFMsg
 		// TODO not sure about this
-		allMessages.removeAll(allCFMsg(sequenceDiagram.osesInCFs()));
+		allMessages.removeAll(getAllCFMsg((ArrayList<CF>) sequenceDiagram.cfs));
 
 		// TODO refactor break2Alt()
 		// break2Alt(sequenceDiagram.osesInCFs(), allMessages);
@@ -599,5 +597,28 @@ public class XMLParser {
 				buildConstraintList((ArrayList<CEU>) ceuEU.directedCEUs, euCons);
 			}
 		}
+	}
+
+	/**
+	 * TODO This function should convert "break" constraints to "alt".
+	 * 
+	 * @param cfs
+	 * @param msgNums
+	 * @return
+	 */
+	private static ArrayList<CF> breakToAlt(ArrayList<CF> cfs, ArrayList<Integer> msgNums) {
+		return cfs;
+	}
+
+	/**
+	 * Accumulates all message numbers for all CFs in cfs
+	 * 
+	 * @return List of all messages in cfs.
+	 */
+	private static ArrayList<Integer> getAllCFMsg(ArrayList<CF> cfs) {
+		ArrayList<Integer> msgNums = new ArrayList<Integer>();
+		for (CF cf : cfs)
+			msgNums.addAll(cf.getAllMsgNums());
+		return msgNums;
 	}
 }
