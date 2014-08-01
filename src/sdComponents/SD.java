@@ -46,6 +46,19 @@ public class SD {
 		}
 		System.err.println("getLifeline(): \"" + name + "\" does not correspond to an instantiated Lifeline.");
 		return null;
-	}	
+	}
+
+	public String toString() {
+		String ret = "SEQUENCE DIAGRAM\n";
+		ret += "\tName: " + name + "\n";
+		ret += "\tLifelines:\n";
+		for (Lifeline element : lifelines)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tCombined fragments:\n";
+		for (CF element : cfs)
+			ret += "\t\t" + element.num + "\n";
+
+		return ret;
+	}
 
 }

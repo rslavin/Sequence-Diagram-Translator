@@ -12,6 +12,7 @@ public class Ordered {
 	public Lifeline lifeline;
 	public List<Ordered> preOrdereds;
 	public List<Ordered> postOrdereds;
+	public String name;
 	
 	public Ordered(){
 		lifeline = null;

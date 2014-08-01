@@ -1,6 +1,7 @@
 package sdComponents;
 
 import java.util.List;
+import enums.OSType;
 
 /**
  * 
@@ -10,7 +11,7 @@ import java.util.List;
  *         sending and receiving OSes.
  * 
  */
-public class Lifeline implements Printable{
+public class Lifeline{
 	public String name;
 	public String type; // unsure
 
@@ -87,17 +88,34 @@ public class Lifeline implements Printable{
 		return false;
 	}
 	
-	public String toString(int tab){
-		String tabs = "";
-		for(int i = 0; i < tab; i++)
-			tabs += "   ";
-		String ret = tabs + "LIFELINE\n";
-		ret += tabs + "Name: " + name + "\n";
-		ret += tabs + "Type: " + type + "\n";
-		ret += tabs + "OSes:\n";
-		for(OS os : oses)
-			ret += os.toString(tab + 1);
-		
+	public String toString(){
+		String ret = "LIFELINE\n";
+		ret += "\tName: " + name + "\n";
+		ret += "\tType: " + type + "\n";
+		ret += "\tOSes:\n";
+		for(OS element : oses)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tDirected OSes:\n";
+		for(OS element : directedOSes)
+			ret += "\t\t" + element.name + "\n";
+		ret += "Directed CEUs:\n";
+		for(CEU element : directedCEUs)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tConnected Lifelines:\n";
+		for(Lifeline element : connectedLifelines)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tOrdered Elements:\n";
+		for(Ordered element : orderedElements)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tStates:\n";
+		for(String element : states)
+			ret += "\t\t" + element + "\n";
+		ret += "\tCriticals:\n";
+		for(EU element : criticals)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tOSes:\n";
+		for(EU element : assertions)
+			ret += "\t\t" + element.name + "\n";		
 		
 		return ret;
 	}

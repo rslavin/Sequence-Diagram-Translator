@@ -20,7 +20,6 @@ import enums.Operator;
 public class CEU extends Ordered {
 	public CF cf; // cf to which CEU belongs
 	public List<EU> eus; // list of EUs
-	public String name;
 
 	// lists
 	// TODO the following covered lists should be able to be derived from
@@ -94,6 +93,45 @@ public class CEU extends Ordered {
 				return firstEU.directedCEUs.get(0).getFirstOS();
 		}
 		return null;
+	}
+
+	public String toString() {
+		String ret = "CEU\n";
+		ret += "\tName: " + name + "\n";
+		ret += "\tCombined Fragment: " + cf.num + "\n";
+		ret += "\tHas critical child: " + hasCriticalChild;
+		ret += "\tFirst OS: " + firstOS.name;
+		ret += "\tIteration: " + iteration;
+		ret += "\tIs parent of parent: " + isParentPar;
+		ret += "\tEUs:\n";
+		for (EU element : eus)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tCovered Lifeline Names:\n";
+		for (String element : coveredLifelineNames)
+			ret += "\t\t" + element + "\n";
+		ret += "\tCovered Operators:\n";
+		for (Operator element : coveredOperators)
+			ret += "\t\t" + element + "\n";
+		ret += "\tCovered Constraints:\n";
+		for (Constraint element : coveredConstraints)
+			ret += "\t\t" + element.constraint + "\n";
+		ret += "\tPre OSes:\n";
+		for (OS element : preOSes)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tPost OSes:\n";
+		for (OS element : postOSes)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tParent CEUs:\n";
+		for (CEU element : parentCEUs)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tEU iterations:\n";
+		for (EU element : euIterations)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tConnected CEUs:\n";
+		for (CEU element : connectedCEUs)
+			ret += "\t\t" + element.name + "\n";
+
+		return ret;
 	}
 
 }

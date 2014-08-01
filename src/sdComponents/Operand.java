@@ -23,5 +23,24 @@ public class Operand {
 		this.lifelines = lifelines;
 		this.msgNums = msgNums;
 	}
+	
+	public String toString(){
+		String ret = "OPERAND\n";
+		ret += "\tConstraint: " + constraint.constraint + "\n";
+		ret += "\tCombined fragments:\n";
+		for (CF element : cfs)
+			ret += "\t\t" + element.num + "\n";
+		ret += "\tLifelines:\n";
+		for (Lifeline element : lifelines)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tEUs: \n";
+		for (EU element : eus)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tMessage numbers:\n";
+		for (int element : msgNums)
+			ret += "\t\t" + element + "\n";
+		
+		return ret;
+	}
 
 }

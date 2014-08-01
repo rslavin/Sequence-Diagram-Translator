@@ -494,7 +494,7 @@ public class XMLParser {
 				}
 			}
 			for (EU ceuEU : ceu.eus)
-				ceuEU.orderds = buildOrdered((ArrayList<OS>) ceuEU.directedOSes, (ArrayList<CEU>) ceuEU.directedCEUs);
+				ceuEU.ordereds = buildOrdered((ArrayList<OS>) ceuEU.directedOSes, (ArrayList<CEU>) ceuEU.directedCEUs);
 		}
 		// generate pre and post Ordereds for ordereds list
 		if (ordereds.size() > 1) {
@@ -532,7 +532,7 @@ public class XMLParser {
 			} else if (ordered instanceof CEU) {
 				CEU ceu = (CEU) ordered;
 				for (EU ceuEU : ceu.eus)
-					ceuEU.states = buildStates((ArrayList<Ordered>) ceuEU.orderds);
+					ceuEU.states = buildStates((ArrayList<Ordered>) ceuEU.ordereds);
 			}
 		}
 		return states;

@@ -22,4 +22,16 @@ public enum MessageType {
 			return null;
 		}
 	}
+
+	public String toString() {
+		switch (this) {
+		case SYNC:
+			return "synchronous";
+		case ASYNC:
+			return "asynchronous";
+		default:
+			System.err.println("Error converting MessageType to string.");
+			return null;
+		}
+	}
 }

@@ -21,7 +21,7 @@ public class CF {
 	public List<CEU> ceus;
 	public List<OS> oses;
 	public int num;
-	public List<Operand> iterations; 
+	public List<Operand> iterations;
 
 	public CF(Operator operator, List<Lifeline> lifelines, List<Operand> operands) {
 		this.operator = operator;
@@ -40,13 +40,37 @@ public class CF {
 	 * @return Total message numbers.
 	 */
 	public ArrayList<Integer> getAllMsgNums() {
-		ArrayList<Integer> msgs = new ArrayList();
+		ArrayList<Integer> msgs = new ArrayList<Integer>();
 		for (Operand op : operands) {
 			msgs.addAll(op.msgNums);
 			for (CF opCF : op.cfs)
 				msgs.addAll(opCF.getAllMsgNums());
 		}
 		return msgs;
+	}
+
+	public String toString() {
+		String ret = "CF\n";
+		ret += "\tNumber: " + num + "\n";
+		ret += "\tOperator: " + operator + "\n";
+		ret += "\tFirst OS: " + firstOS.name + "\n";
+		ret += "\tLifelines:\n";
+		for (Lifeline element : lifelines)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tOperands:\n";
+		for (Operand element : operands)
+			ret += "\t\t" + element.constraint.constraint + "\n";
+		ret += "\tCEUs:\n";
+		for (CEU element : ceus)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tOSes:\n";
+		for (OS element : oses)
+			ret += "\t\t" + element.name + "\n";
+		ret += "\tIterations:\n";
+		for (Operand element : operands)
+			ret += "\t\t" + element.constraint.constraint + "\n";
+
+		return ret;
 	}
 
 }

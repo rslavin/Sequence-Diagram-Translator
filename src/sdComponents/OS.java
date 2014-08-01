@@ -15,7 +15,6 @@ import enums.*;
  */
 public class OS extends Ordered {
 	public Lifeline connectedLifeline; // lifeline at other end of message
-	public String name;
 	public int number;
 	public OSType osType;
 	public MessageType messageType;
@@ -50,6 +49,28 @@ public class OS extends Ordered {
 		default:
 			return null;
 		}
+	}
+
+	public String toString(int tabs) {
+		String ret = "OS\n";
+		ret += "\tNumber: " + number + "\n";
+		ret += "\tLifeline: " + connectedLifeline + "\n";
+		ret += "\tOS Type: " + osType + "\n";
+		ret += "\tMessage Type: " + messageType + "\n";
+		ret += "\tLayer: " + layer + "\n";
+		ret += "\tLocation: " + location + "\n";
+		ret += "\tIteration: " + iteration + "\n";
+		ret += "\tConstraints:\n";
+		for (Constraint element : constraints)
+			ret += "\t\t" + element.constraint + "\n";
+		ret += "\tParents:\n";
+		for (String element : parents)
+			ret += "\t\t" + element + "\n";
+		ret += "\tConnected parents:\n";
+		for (String element : connectedParents)
+			ret += "\t\t" + element + "\n";
+
+		return ret;
 	}
 
 }
