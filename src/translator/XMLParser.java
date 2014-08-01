@@ -14,7 +14,6 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import comparators.OSComparator;
-
 import enums.MessageType;
 import enums.Operator;
 
@@ -594,14 +593,16 @@ public class XMLParser {
 	 * @param msgNums
 	 * @return
 	 */
+	@SuppressWarnings("unused")
 	private static void breakToAlt(ArrayList<CF> cfs, ArrayList<Integer> msgNums) {
 	}
 
 	/**
-	 * TODO this function shoudl convert "consider" to "ignore"
+	 * TODO this function should convert "consider" to "ignore"
 	 * 
 	 * @param ceus
 	 */
+	@SuppressWarnings("unused")
 	private static void considerToIgnore(ArrayList<CEU> ceus) {
 
 	}

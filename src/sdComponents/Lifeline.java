@@ -10,7 +10,7 @@ import java.util.List;
  *         sending and receiving OSes.
  * 
  */
-public class Lifeline {
+public class Lifeline implements Printable{
 	public String name;
 	public String type; // unsure
 
@@ -85,6 +85,21 @@ public class Lifeline {
 			if (os.connectedLifeline.equals(this))
 				return true;
 		return false;
+	}
+	
+	public String toString(int tab){
+		String tabs = "";
+		for(int i = 0; i < tab; i++)
+			tabs += "   ";
+		String ret = tabs + "LIFELINE\n";
+		ret += tabs + "Name: " + name + "\n";
+		ret += tabs + "Type: " + type + "\n";
+		ret += tabs + "OSes:\n";
+		for(OS os : oses)
+			ret += os.toString(tab + 1);
+		
+		
+		return ret;
 	}
 
 }
