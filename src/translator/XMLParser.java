@@ -606,8 +606,16 @@ public class XMLParser {
 	 * @param msgNums
 	 * @return
 	 */
-	private static ArrayList<CF> breakToAlt(ArrayList<CF> cfs, ArrayList<Integer> msgNums) {
-		return cfs;
+	private static void breakToAlt(ArrayList<CF> cfs, ArrayList<Integer> msgNums) {
+	}
+
+	/**
+	 * TODO this function shoudl convert "consider" to "ignore"
+	 * 
+	 * @param ceus
+	 */
+	private static void considerToIgnore(ArrayList<CEU> ceus) {
+
 	}
 
 	/**
@@ -653,7 +661,7 @@ public class XMLParser {
 							opEU.states.add(j + 1, curState);
 						}
 
-						opEU.directedCEUs = buildIterationCEU(opEU.directedCEUs, i, minIteration);
+						buildCEUIterations((ArrayList<CEU>)opEU.directedCEUs, i, minIteration);
 
 						for (CEU cfCEU : cf.ceus) {
 							if (cfCEU.lifeline.equals(opEU.lifeline)) {
@@ -667,5 +675,60 @@ public class XMLParser {
 				}
 			}
 		}
+	}
+
+	/**
+	 * Propagates iterations.
+	 * 
+	 * @param ceus
+	 *            List of CEUs to propogate iterations.
+	 * @param iteration
+	 *            Current iteration.
+	 * @param minIteration
+	 *            Minimum iteration.
+	 */
+	private static void buildCEUIterations(ArrayList<CEU> ceus, int iteration, int minIteration) {
+		for (CEU ceu : ceus) {
+			ceu.iteration = iteration + 1;
+			for (EU ceuEU : ceu.eus) {
+				if (iteration < minIteration - 1)
+					ceuEU.operand.constraint.constraint = "true";
+				for (OS directedOS : ceuEU.directedOSes)
+					directedOS.name = directedOS.name + "[" + (iteration + 1) + "]";
+				buildCEUIterations((ArrayList<CEU>) ceuEU.directedCEUs, iteration, minIteration);
+			}
+		}
+	}
+	
+	/**
+	 * Builds array of critical EUs
+	 * @param ceus List of CEUs to check for criticals.
+	 * @param criticals Current list of critical EUs.
+	 * @return List of EUs containing criticals.
+	 */
+	private static ArrayList<EU> buildCriticals(ArrayList<CEU> ceus, ArrayList<EU> criticals){
+		for(CEU ceu : ceus){
+			if(ceu.cf.operator.equals(Operator.CRIT))
+				criticals.add(ceu.eus.get(0));
+			for(EU ceuEU : ceu.eus)
+				criticals.addAll(buildCriticals((ArrayList<CEU>)ceuEU.directedCEUs, criticals));				
+		}
+		return criticals;
+	}
+	
+	/**
+	 * Builds array of critical EUs
+	 * @param ceus List of CEUs to check for assertions.
+	 * @param assertions Current List of assertion EUs
+	 * @return List of EUs containing assertions.
+	 */
+	private static ArrayList<EU> buildAssertions(ArrayList<CEU> ceus, ArrayList<EU> assertions){
+		for(CEU ceu : ceus){
+			if(ceu.cf.operator.equals(Operator.ASSERT))
+				assertions.add(ceu.eus.get(0));
+			for(EU ceuEU : ceu.eus)
+				assertions.addAll(buildAssertions((ArrayList<CEU>)ceuEU.directedCEUs, assertions));				
+		}
+		return assertions;
 	}
 }

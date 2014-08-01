@@ -34,6 +34,7 @@ public class CEU extends Ordered {
 
 	public boolean hasCriticalChild;
 	public OS firstOS; // was "int firstOSLocation"
+	public int iteration;
 
 	public boolean isParentPar; // unsure
 	public List<EU> euIterations; // unsure
