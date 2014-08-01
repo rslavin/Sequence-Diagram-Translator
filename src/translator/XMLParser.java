@@ -7,7 +7,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 
-import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 
 import org.w3c.dom.Document;
@@ -29,7 +28,6 @@ import enums.Operator;
  */
 public class XMLParser {
 	private static SD sequenceDiagram;
-	private static int cfNum = 0; // TODO is this necessary?
 
 	/**
 	 * Parses file into dom and normalizes, then calls parseSequenceDiagram() to
@@ -53,7 +51,6 @@ public class XMLParser {
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
-
 	}
 
 	/**
@@ -107,10 +104,8 @@ public class XMLParser {
 		}
 
 		// remove from allMessages any messages that appear in AllCFMsg
-		// TODO not sure about this
 		allMessages.removeAll(getAllCFMsg((ArrayList<CF>) sequenceDiagram.cfs));
 
-		// TODO refactor break2Alt()
 		// break2Alt(sequenceDiagram.osesInCFs(), allMessages);
 		generateReceivingOSes();
 		composeEU();
@@ -271,13 +266,8 @@ public class XMLParser {
 	 */
 	private static void composeEU() {
 		for (Lifeline lifeline : sequenceDiagram.lifelines)
-			findMsgInEU(lifeline, sequenceDiagram.cfs, 0, new ArrayList<String>()); // TODO
-																					// change
-																					// prototype
-																					// (curLifeline,
-		// layer)
+			findMsgInEU(lifeline, sequenceDiagram.cfs, 0, new ArrayList<String>());
 
-		// TODO unsure about connectedParents
 		for (Lifeline outerLifeline : sequenceDiagram.lifelines)
 			for (OS outerOS : outerLifeline.oses)
 				// check each other Lifeline
@@ -350,12 +340,12 @@ public class XMLParser {
 			lifeline.directedCEUs = generateCEUs(lifeline, (ArrayList<CF>) sequenceDiagram.cfs, new ArrayList<String>(),
 					new ArrayList<CEU>());
 			lifeline.orderedElements = buildOrdered((ArrayList<OS>) lifeline.directedOSes, (ArrayList<CEU>) lifeline.directedCEUs);
-			lifeline.states = buildStates(lifeline.orderedElements);
+			lifeline.states = buildStates((ArrayList<Ordered>) lifeline.orderedElements);
 
 			allCEUs.addAll(lifeline.directedCEUs);
 
-			buildCondList(lifeline.directedCEUs, new ArrayList<Ordered>());
-			lifeline.directedCEUs = considerToIgnore(lifeline.directedCEUs);
+			buildConstraints((ArrayList<CEU>) lifeline.directedCEUs, new ArrayList<Constraint>());
+			// lifeline.directedCEUs = considerToIgnore(lifeline.directedCEUs);
 		}
 
 		buildConnectedEUs((ArrayList<CF>) sequenceDiagram.cfs);
@@ -366,8 +356,8 @@ public class XMLParser {
 			for (Lifeline connectedLifeline : sequenceDiagram.lifelines)
 				if (!lifeline.equals(connectedLifeline)) // TODO correct?
 					lifeline.connectedLifelines.add(connectedLifeline);
-			lifeline.criticals = buildCriticalList(lifeline.directedCEUs, new ArrayList<EU>());
-			lifeline.assertions = buildAssertionList(lifeline.assertions, new ArrayList<EU>());
+			lifeline.criticals = buildCriticals((ArrayList<CEU>) lifeline.directedCEUs, new ArrayList<EU>());
+			lifeline.assertions = buildAssertions((ArrayList<CEU>) lifeline.directedCEUs, new ArrayList<EU>());
 		}
 	}
 
@@ -415,8 +405,7 @@ public class XMLParser {
 
 					// add parent prefix to covered lifeline names
 					for (Lifeline cfCoveredLifeline : cf.lifelines) {
-						if (cfCoveredLifeline != cfLifeline) // skip this
-																// lifeline
+						if (cfCoveredLifeline != cfLifeline) // skip
 							ceu.coveredLifelineNames.add(parents.get(parents.size() - 1) + cfCoveredLifeline.name);
 					}
 
@@ -534,18 +523,17 @@ public class XMLParser {
 	 *            Ordereds for which state labels should be generated.
 	 * @return List of labels.
 	 */
-	private static ArrayList<String> buildStateList(ArrayList<Ordered> ordereds) {
+	private static ArrayList<String> buildStates(ArrayList<Ordered> ordereds) {
 		ArrayList<String> states = new ArrayList<String>();
 		states.add("sinit");
 
 		for (Ordered ordered : ordereds) {
 			if (ordered instanceof OS) {
-				OS os = (OS) ordered;
 				states.add(((OS) ordered).getStateLabel());
 			} else if (ordered instanceof CEU) {
 				CEU ceu = (CEU) ordered;
 				for (EU ceuEU : ceu.eus)
-					ceuEU.states = buildStateList((ArrayList<Ordered>) ceuEU.orderds);
+					ceuEU.states = buildStates((ArrayList<Ordered>) ceuEU.orderds);
 			}
 		}
 		return states;
@@ -587,14 +575,14 @@ public class XMLParser {
 	 * @param parentConstraints
 	 *            Parent constraints to propagate.
 	 */
-	private static void buildConstraintList(ArrayList<CEU> ceus, ArrayList<Constraint> parentConstraints) {
+	private static void buildConstraints(ArrayList<CEU> ceus, ArrayList<Constraint> parentConstraints) {
 		for (CEU ceu : ceus) {
 			for (EU ceuEU : ceu.eus) {
 				ArrayList<Constraint> euCons = new ArrayList<Constraint>(parentConstraints);
 				euCons.add(ceuEU.getConstraint());
 				for (OS euOS : ceuEU.directedOSes)
 					euOS.constraints = new ArrayList<Constraint>(euCons);
-				buildConstraintList((ArrayList<CEU>) ceuEU.directedCEUs, euCons);
+				buildConstraints((ArrayList<CEU>) ceuEU.directedCEUs, euCons);
 			}
 		}
 	}
@@ -661,7 +649,7 @@ public class XMLParser {
 							opEU.states.add(j + 1, curState);
 						}
 
-						buildCEUIterations((ArrayList<CEU>)opEU.directedCEUs, i, minIteration);
+						buildCEUIterations((ArrayList<CEU>) opEU.directedCEUs, i, minIteration);
 
 						for (CEU cfCEU : cf.ceus) {
 							if (cfCEU.lifeline.equals(opEU.lifeline)) {
@@ -699,35 +687,41 @@ public class XMLParser {
 			}
 		}
 	}
-	
+
 	/**
 	 * Builds array of critical EUs
-	 * @param ceus List of CEUs to check for criticals.
-	 * @param criticals Current list of critical EUs.
+	 * 
+	 * @param ceus
+	 *            List of CEUs to check for criticals.
+	 * @param criticals
+	 *            Current list of critical EUs.
 	 * @return List of EUs containing criticals.
 	 */
-	private static ArrayList<EU> buildCriticals(ArrayList<CEU> ceus, ArrayList<EU> criticals){
-		for(CEU ceu : ceus){
-			if(ceu.cf.operator.equals(Operator.CRIT))
+	private static ArrayList<EU> buildCriticals(ArrayList<CEU> ceus, ArrayList<EU> criticals) {
+		for (CEU ceu : ceus) {
+			if (ceu.cf.operator.equals(Operator.CRIT))
 				criticals.add(ceu.eus.get(0));
-			for(EU ceuEU : ceu.eus)
-				criticals.addAll(buildCriticals((ArrayList<CEU>)ceuEU.directedCEUs, criticals));				
+			for (EU ceuEU : ceu.eus)
+				criticals.addAll(buildCriticals((ArrayList<CEU>) ceuEU.directedCEUs, criticals));
 		}
 		return criticals;
 	}
-	
+
 	/**
 	 * Builds array of critical EUs
-	 * @param ceus List of CEUs to check for assertions.
-	 * @param assertions Current List of assertion EUs
+	 * 
+	 * @param ceus
+	 *            List of CEUs to check for assertions.
+	 * @param assertions
+	 *            Current List of assertion EUs
 	 * @return List of EUs containing assertions.
 	 */
-	private static ArrayList<EU> buildAssertions(ArrayList<CEU> ceus, ArrayList<EU> assertions){
-		for(CEU ceu : ceus){
-			if(ceu.cf.operator.equals(Operator.ASSERT))
+	private static ArrayList<EU> buildAssertions(ArrayList<CEU> ceus, ArrayList<EU> assertions) {
+		for (CEU ceu : ceus) {
+			if (ceu.cf.operator.equals(Operator.ASSERT))
 				assertions.add(ceu.eus.get(0));
-			for(EU ceuEU : ceu.eus)
-				assertions.addAll(buildAssertions((ArrayList<CEU>)ceuEU.directedCEUs, assertions));				
+			for (EU ceuEU : ceu.eus)
+				assertions.addAll(buildAssertions((ArrayList<CEU>) ceuEU.directedCEUs, assertions));
 		}
 		return assertions;
 	}
