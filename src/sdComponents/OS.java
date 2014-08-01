@@ -51,24 +51,32 @@ public class OS extends Ordered {
 		}
 	}
 
+	public String toString(){
+		return this.toString(0);
+	}
+	
 	public String toString(int tabs) {
-		String ret = "OS\n";
-		ret += "\tNumber: " + number + "\n";
-		ret += "\tLifeline: " + connectedLifeline + "\n";
-		ret += "\tOS Type: " + osType + "\n";
-		ret += "\tMessage Type: " + messageType + "\n";
-		ret += "\tLayer: " + layer + "\n";
-		ret += "\tLocation: " + location + "\n";
-		ret += "\tIteration: " + iteration + "\n";
-		ret += "\tConstraints:\n";
+		String tab = "";
+		for(int i = 0; i < tabs; i++)
+			tab += "   ";
+		
+		String ret = tab + "OS\n";
+		ret += tab + "\tNumber: " + number + "\n";
+		ret += tab + "\tLifeline: " + connectedLifeline + "\n";
+		ret += tab + "\tOS Type: " + osType + "\n";
+		ret += tab + "\tMessage Type: " + messageType + "\n";
+		ret += tab + "\tLayer: " + layer + "\n";
+		ret += tab + "\tLocation: " + location + "\n";
+		ret += tab + "\tIteration: " + iteration + "\n";
+		ret += tab + "\tConstraints:\n";
 		for (Constraint element : constraints)
-			ret += "\t\t" + element.constraint + "\n";
-		ret += "\tParents:\n";
+			ret += tab + "\t\t" + element.constraint + "\n";
+		ret += tab + "\tParents:\n";
 		for (String element : parents)
-			ret += "\t\t" + element + "\n";
-		ret += "\tConnected parents:\n";
+			ret += tab + "\t\t" + element + "\n";
+		ret += tab + "\tConnected parents:\n";
 		for (String element : connectedParents)
-			ret += "\t\t" + element + "\n";
+			ret += tab + "\t\t" + element + "\n";
 
 		return ret;
 	}

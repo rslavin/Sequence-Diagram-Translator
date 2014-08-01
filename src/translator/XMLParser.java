@@ -14,8 +14,7 @@ import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
 
 import comparators.OSComparator;
-import enums.MessageType;
-import enums.Operator;
+import enums.*;
 
 /**
  * 

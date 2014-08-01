@@ -89,33 +89,41 @@ public class Lifeline{
 	}
 	
 	public String toString(){
-		String ret = "LIFELINE\n";
-		ret += "\tName: " + name + "\n";
-		ret += "\tType: " + type + "\n";
-		ret += "\tOSes:\n";
+		return this.toString(0);
+	}
+	
+	public String toString(int tabs){
+		String tab = "";
+		for(int i = 0; i < tabs; i++)
+			tab += "   ";
+		
+		String ret = tab + "LIFELINE\n";
+		ret += tab + "\tName: " + name + "\n";
+		ret += tab + "\tType: " + type + "\n";
+		ret += tab + "\tOSes:\n";
 		for(OS element : oses)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tDirected OSes:\n";
+			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
+		ret += tab + "\tDirected OSes:\n";
 		for(OS element : directedOSes)
-			ret += "\t\t" + element.name + "\n";
-		ret += "Directed CEUs:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "Directed CEUs:\n";
 		for(CEU element : directedCEUs)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tConnected Lifelines:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tConnected Lifelines:\n";
 		for(Lifeline element : connectedLifelines)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tOrdered Elements:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tOrdered Elements:\n";
 		for(Ordered element : orderedElements)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tStates:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tStates:\n";
 		for(String element : states)
-			ret += "\t\t" + element + "\n";
-		ret += "\tCriticals:\n";
+			ret += tab + "\t\t" + element + "\n";
+		ret += tab + "\tCriticals:\n";
 		for(EU element : criticals)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tOSes:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tOSes:\n";
 		for(EU element : assertions)
-			ret += "\t\t" + element.name + "\n";		
+			ret += tab + "\t\t" + element.name + "\n";		
 		
 		return ret;
 	}

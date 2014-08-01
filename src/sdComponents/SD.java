@@ -49,14 +49,22 @@ public class SD {
 	}
 
 	public String toString() {
-		String ret = "SEQUENCE DIAGRAM\n";
-		ret += "\tName: " + name + "\n";
-		ret += "\tLifelines:\n";
+		return this.toString(0);
+	}
+	
+	public String toString(int tabs) {
+		String tab = "";
+		for(int i = 0; i < tabs; i++)
+			tab += "   ";
+		
+		String ret = tab + "SEQUENCE DIAGRAM\n";
+		ret +=  tab + "\tName: " + name + "\n";
+		ret +=  tab + "\tLifelines:\n";
 		for (Lifeline element : lifelines)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tCombined fragments:\n";
+			ret +=  tab + "\t\t" + element.toString(tabs + 1) + "\n";
+		ret +=  tab + "\tCombined fragments:\n";
 		for (CF element : cfs)
-			ret += "\t\t" + element.num + "\n";
+			ret +=  tab + "\t\t" + element.toString(tabs + 1) + "\n";
 
 		return ret;
 	}

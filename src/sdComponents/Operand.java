@@ -25,20 +25,28 @@ public class Operand {
 	}
 	
 	public String toString(){
-		String ret = "OPERAND\n";
-		ret += "\tConstraint: " + constraint.constraint + "\n";
-		ret += "\tCombined fragments:\n";
+		return this.toString(0);
+	}
+	
+	public String toString(int tabs){
+		String tab = "";
+		for(int i = 0; i < tabs; i++)
+			tab += "   ";
+		
+		String ret = tab + "OPERAND\n";
+		ret += tab + "\tConstraint: " + constraint.constraint + "\n";
+		ret += tab + "\tCombined fragments:\n";
 		for (CF element : cfs)
-			ret += "\t\t" + element.num + "\n";
-		ret += "\tLifelines:\n";
+			ret += tab + "\t\t" + element.num + "\n";
+		ret += tab + "\tLifelines:\n";
 		for (Lifeline element : lifelines)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tEUs: \n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tEUs: \n";
 		for (EU element : eus)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tMessage numbers:\n";
+			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
+		ret += tab + "\tMessage numbers:\n";
 		for (int element : msgNums)
-			ret += "\t\t" + element + "\n";
+			ret += tab + "\t\t" + element + "\n";
 		
 		return ret;
 	}

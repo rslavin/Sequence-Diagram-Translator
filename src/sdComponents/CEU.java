@@ -94,42 +94,49 @@ public class CEU extends Ordered {
 		}
 		return null;
 	}
+	
+	public String toString(){
+		return this.toString(0);
+	}
 
-	public String toString() {
-		String ret = "CEU\n";
-		ret += "\tName: " + name + "\n";
-		ret += "\tCombined Fragment: " + cf.num + "\n";
-		ret += "\tHas critical child: " + hasCriticalChild;
-		ret += "\tFirst OS: " + firstOS.name;
-		ret += "\tIteration: " + iteration;
-		ret += "\tIs parent of parent: " + isParentPar;
-		ret += "\tEUs:\n";
+	public String toString(int tabs) {
+		String tab = "";
+		for(int i = 0; i < tabs; i++)
+			tab += "   ";
+		String ret = tab + "CEU\n";
+		ret += tab + "\tName: " + name + "\n";
+		ret += tab + "\tCombined Fragment: " + cf.num + "\n";
+		ret += tab + "\tHas critical child: " + hasCriticalChild;
+		ret += tab + "\tFirst OS: " + firstOS.name;
+		ret += tab + "\tIteration: " + iteration;
+		ret += tab + "\tIs parent of parent: " + isParentPar;
+		ret += tab + "\tEUs:\n";
 		for (EU element : eus)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tCovered Lifeline Names:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tCovered Lifeline Names:\n";
 		for (String element : coveredLifelineNames)
-			ret += "\t\t" + element + "\n";
-		ret += "\tCovered Operators:\n";
+			ret += tab + "\t\t" + element + "\n";
+		ret += tab + "\tCovered Operators:\n";
 		for (Operator element : coveredOperators)
-			ret += "\t\t" + element + "\n";
-		ret += "\tCovered Constraints:\n";
+			ret += tab + "\t\t" + element + "\n";
+		ret += tab + "\tCovered Constraints:\n";
 		for (Constraint element : coveredConstraints)
-			ret += "\t\t" + element.constraint + "\n";
-		ret += "\tPre OSes:\n";
+			ret += tab + "\t\t" + element.constraint + "\n";
+		ret += tab + "\tPre OSes:\n";
 		for (OS element : preOSes)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tPost OSes:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tPost OSes:\n";
 		for (OS element : postOSes)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tParent CEUs:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tParent CEUs:\n";
 		for (CEU element : parentCEUs)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tEU iterations:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tEU iterations:\n";
 		for (EU element : euIterations)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tConnected CEUs:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tConnected CEUs:\n";
 		for (CEU element : connectedCEUs)
-			ret += "\t\t" + element.name + "\n";
+			ret += tab + "\t\t" + element.name + "\n";
 
 		return ret;
 	}

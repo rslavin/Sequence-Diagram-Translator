@@ -55,39 +55,47 @@ public class EU {
 			return operand.constraint.num;
 		return -1;
 	}
+	
+	public String toString(){
+		return this.toString(0);
+	}
 
-	public String toString() {
-		String ret = "EU\n";
-		ret += "\tName: " + name + "\n";
-		ret += "\tLifeline: " + lifeline.name + "\n";
-		ret += "\tOperand: " + operand.constraint.constraint + "\n";
-		ret += "\tDirected OSes:\n";
+	public String toString(int tabs) {
+		String tab = "";
+		for(int i = 0; i < tabs; i++)
+			tab += "   ";
+		
+		String ret = tab + "EU\n";
+		ret += tab + "\tName: " + name + "\n";
+		ret += tab + "\tLifeline: " + lifeline.name + "\n";
+		ret += tab + "\tOperand: " + operand.constraint.constraint + "\n";
+		ret += tab + "\tDirected OSes:\n";
 		for (OS element : directedOSes)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tDirected CEUes:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tDirected CEUes:\n";
 		for (CEU element : directedCEUs)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tConnected EUs:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tConnected EUs:\n";
 		for (EU element : connectedEUs)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tCovered EU labels:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tCovered EU labels:\n";
 		for (String element : coveredEULabels)
-			ret += "\t\t" + element + "\n";
-		ret += "\tStates:\n";
+			ret += tab + "\t\t" + element + "\n";
+		ret += tab + "\tStates:\n";
 		for (String element : states)
-			ret += "\t\t" + element + "\n";
-		ret += "\tOrdereds:\n";
+			ret += tab + "\t\t" + element + "\n";
+		ret += tab + "\tOrdereds:\n";
 		for (Ordered element : ordereds)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tIgnored OSes:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tIgnored OSes:\n";
 		for (OS element : ignoreOSes)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tConsidered OSes:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tConsidered OSes:\n";
 		for (OS element : consideredOSes)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tAll possible OSes:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tAll possible OSes:\n";
 		for (OS element : allPossibleOSes)
-			ret += "\t\t" + element.name + "\n";
+			ret += tab + "\t\t" + element.name + "\n";
 
 		return ret;
 	}

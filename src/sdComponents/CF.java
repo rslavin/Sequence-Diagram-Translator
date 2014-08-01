@@ -50,25 +50,33 @@ public class CF {
 	}
 
 	public String toString() {
-		String ret = "CF\n";
-		ret += "\tNumber: " + num + "\n";
-		ret += "\tOperator: " + operator + "\n";
-		ret += "\tFirst OS: " + firstOS.name + "\n";
-		ret += "\tLifelines:\n";
+		return this.toString(0);
+	}
+	
+	public String toString(int tabs) {
+		String tab = "";
+		for(int i = 0; i < tabs; i++)
+			tab += "   ";
+		
+		String ret = tab + "CF\n";
+		ret += tab + "\tNumber: " + num + "\n";
+		ret += tab + "\tOperator: " + operator + "\n";
+		ret += tab + "\tFirst OS: " + firstOS.name + "\n";
+		ret += tab + "\tLifelines:\n";
 		for (Lifeline element : lifelines)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tOperands:\n";
+			ret += tab + "\t\t" + element.name + "\n";
+		ret += tab + "\tOperands:\n";
 		for (Operand element : operands)
-			ret += "\t\t" + element.constraint.constraint + "\n";
-		ret += "\tCEUs:\n";
+			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
+		ret += tab + "\tCEUs:\n";
 		for (CEU element : ceus)
-			ret += "\t\t" + element.name + "\n";
-		ret += "\tOSes:\n";
+			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
+		ret += tab + "\tOSes:\n";
 		for (OS element : oses)
-			ret += "\t\t" + element.name + "\n";
+			ret += tab + "\t\t" + element.name + "\n";
 		ret += "\tIterations:\n";
 		for (Operand element : operands)
-			ret += "\t\t" + element.constraint.constraint + "\n";
+			ret += tab + "\t\t" + element.constraint.constraint + "\n";
 
 		return ret;
 	}
