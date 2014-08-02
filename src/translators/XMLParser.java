@@ -26,6 +26,7 @@ import enums.*;
  */
 public class XMLParser {
 	private static SD sequenceDiagram;
+	private static int cfNum = 1;
 
 	/**
 	 * Parses file into dom and normalizes, then calls parseSequenceDiagram() to
@@ -167,7 +168,7 @@ public class XMLParser {
 		for (int i = 0; i < xmlOperands.getLength(); i++)
 			operands.add(parseOperand((Element) xmlOperands.item(i), lifelines));
 
-		return new CF(Operator.getOperator(elementValue(xmlElement, "operator")), lifelines, operands);
+		return new CF(Operator.getOperator(elementValue(xmlElement, "operator")), lifelines, operands, cfNum++);
 	}
 
 	/**
@@ -182,7 +183,7 @@ public class XMLParser {
 	 */
 	private static OS parseOS(Element xmlElement, Lifeline lifeline) {
 		return new OS(lifeline, elementValue(xmlElement, "name"), Integer.parseInt(elementValue(xmlElement, "number")),
-				OSType.RECEIVE, MessageType.getMessageType(elementValue(xmlElement, "type")));
+				OSType.SEND, MessageType.getMessageType(elementValue(xmlElement, "type")));
 	}
 
 	/**
@@ -219,8 +220,10 @@ public class XMLParser {
 		Element xmlConstraint = (Element) xmlElement.getElementsByTagName("condition").item(0);
 		Constraint constraint = new Constraint(elementValue(xmlConstraint, "name"), sequenceDiagram.getLifeline(elementValue(
 				xmlConstraint, "lifeline")));
-
-		return new Operand(constraint, new ArrayList<Lifeline>(lifelines), msgNums);
+		Operand op = new Operand(constraint);
+		op.lifelines = new ArrayList<Lifeline>(lifelines);
+		op.msgNums = msgNums;
+		return op;
 	}
 
 	/**
@@ -388,7 +391,6 @@ public class XMLParser {
 				// create ceu projection onto lifeline
 				if (cfLifeline.equals(lifeline)) {
 					CEU ceu = new CEU(cf);
-					cf.ceus.add(ceu);
 					ceu.lifeline = cfLifeline;
 					ceu.name = cf.operator.toString() + cf.num + "_" + cfLifeline.name;
 
@@ -473,6 +475,7 @@ public class XMLParser {
 	 */
 	private static ArrayList<Ordered> buildOrdered(ArrayList<OS> oses, ArrayList<CEU> ceus) {
 		ArrayList<Ordered> ordereds = new ArrayList<Ordered>(oses);
+
 		// add ceus to ordered in order
 		for (CEU ceu : ceus) {
 			if (ordereds.size() == 0)
@@ -480,13 +483,13 @@ public class XMLParser {
 			else {
 				for (int i = 0; i < ordereds.size(); i++) {
 					Ordered ord = ordereds.get(i);
-					if (ceu.getFirstOS() != null) // temp fix
+					if (ceu.getFirstOS() != null) {
 						if (ord instanceof OS) {
 							OS tempOS = (OS) ord;
 							if (ceu.getFirstOS().number < tempOS.number) {
 								ordereds.add(i, ceu);
 								break;
-							} else if (i == ordereds.size()) {
+							} else if (i == ordereds.size() - 1) {
 								ordereds.add(ceu);
 								break;
 							}
@@ -495,17 +498,19 @@ public class XMLParser {
 							if (ceu.getFirstOS().number < tempCEU.getFirstOS().number) {
 								ordereds.add(i, ceu);
 								break;
-							} else if (i == ordereds.size()) {
+							} else if (i == ordereds.size() - 1) {
 								ordereds.add(ceu);
 								break;
 							}
 						}
+					}
 				}
 			}
 			for (EU ceuEU : ceu.eus)
 				ceuEU.ordereds = buildOrdered((ArrayList<OS>) ceuEU.directedOSes, (ArrayList<CEU>) ceuEU.directedCEUs);
 		}
-		// generate pre and post Ordereds for ordereds list
+		// generate pre and post Ordereds for ordereds list (list is single
+		// lifeline)
 		if (ordereds.size() > 1) {
 			for (int i = 0; i < ordereds.size(); i++) {
 				Ordered ord = ordereds.get(i);

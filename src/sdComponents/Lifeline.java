@@ -128,7 +128,7 @@ public class Lifeline {
 		ret += tab + "Connected Lifelines:\n";
 		if (connectedLifelines != null)
 			for (Lifeline element : connectedLifelines)
-				ret += tab + "      " + element.name + "\n";
+				ret += tab + "   " + element.name + "\n";
 
 		ret += tab + "Ordered Elements:\n";
 		if (orderedElements != null)

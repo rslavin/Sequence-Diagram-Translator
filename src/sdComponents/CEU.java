@@ -22,13 +22,9 @@ public class CEU extends Ordered {
 	public List<EU> eus; // list of EUs
 
 	// lists
-	// TODO the following covered lists should be able to be derived from
-	// coveredCFs.
 	public List<String> coveredLifelineNames;
 	public List<Operator> coveredOperators;
 	public List<Constraint> coveredConstraints;
-	public List<OS> preOSes;
-	public List<OS> postOSes;
 	public List<CEU> parentCEUs;
 
 	public boolean hasCriticalChild;
@@ -46,8 +42,6 @@ public class CEU extends Ordered {
 		coveredLifelineNames = new ArrayList<String>();
 		coveredOperators = new ArrayList<Operator>();
 		coveredConstraints = new ArrayList<Constraint>();
-		preOSes = new ArrayList<OS>();
-		postOSes = new ArrayList<OS>();
 		parentCEUs = new ArrayList<CEU>();
 		hasCriticalChild = false;
 		firstOS = null;
@@ -85,7 +79,7 @@ public class CEU extends Ordered {
 	 * @return First OS in CEU.
 	 */
 	public OS getFirstOS() {
-		if (eus != null && eus.size() != 0) {
+		if (eus != null && eus.size() > 0) {
 			EU firstEU = eus.get(0);
 			if (firstEU.directedOSes.size() > 0)
 				return firstEU.directedOSes.get(0);
@@ -105,6 +99,8 @@ public class CEU extends Ordered {
 			tab += "   ";
 		String ret = "   >>CEU<<\n";
 		ret += tab + "Name: " + name + "\n";
+		if (lifeline != null)
+			ret += tab + "Lifeline: " + lifeline.name + "\n";
 		if (cf != null)
 			ret += tab + "Combined Fragment: " + cf.num + "\n";
 		ret += tab + "Has critical child: " + hasCriticalChild + "\n";
@@ -129,12 +125,12 @@ public class CEU extends Ordered {
 			for (Constraint element : coveredConstraints)
 				ret += tab + "   " + element.constraint + "\n";
 		ret += tab + "Pre OSes:\n";
-		if (preOSes != null)
-			for (OS element : preOSes)
+		if (preOrdereds != null)
+			for (Ordered element : preOrdereds)
 				ret += tab + "   " + element.name + "\n";
 		ret += tab + "Post OSes:\n";
-		if (postOSes != null)
-			for (OS element : postOSes)
+		if (postOrdereds != null)
+			for (Ordered element : postOrdereds)
 				ret += tab + "   " + element.name + "\n";
 		ret += tab + "Parent CEUs:\n";
 		if (parentCEUs != null)

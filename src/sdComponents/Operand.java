@@ -19,6 +19,13 @@ public class Operand {
 	public List<EU> eus;
 	public List<Integer> msgNums;
 
+	public Operand(Constraint constraint){
+		this.constraint = constraint;
+		this.cfs = new ArrayList<CF>();
+		this.lifelines = new ArrayList<Lifeline>();
+		this.eus = new ArrayList<EU>();
+		this.msgNums = new ArrayList<Integer>();
+	}
 	public Operand(Constraint constraint, List<Lifeline> lifelines, List<Integer> msgNums) {
 		this.constraint = constraint;
 		this.lifelines = lifelines;

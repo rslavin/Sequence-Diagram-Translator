@@ -23,7 +23,7 @@ public class CF {
 	public int num;
 	public List<Operand> iterations;
 
-	public CF(Operator operator, List<Lifeline> lifelines, List<Operand> operands) {
+	public CF(Operator operator, List<Lifeline> lifelines, List<Operand> operands, int num) {
 		this.operator = operator;
 		this.lifelines = lifelines;
 		this.operands = operands;
@@ -31,7 +31,7 @@ public class CF {
 		ceus = new ArrayList<CEU>();
 		oses = new ArrayList<OS>();
 		iterations = new ArrayList<Operand>();
-		num = -1;
+		this.num = num;
 	}
 
 	/**
