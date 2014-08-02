@@ -21,6 +21,12 @@ public class SD {
 		this.cfs = cfs;
 	}
 
+	public SD(String name) {
+		this.name = name;
+		this.lifelines = new ArrayList<Lifeline>();
+		this.cfs = new ArrayList<CF>();
+	}
+
 	public List<OS> osesInCFs() {
 		List<OS> allOSes = new ArrayList<OS>();
 		for (CF cf : cfs) {
@@ -51,20 +57,20 @@ public class SD {
 	public String toString() {
 		return this.toString(0);
 	}
-	
+
 	public String toString(int tabs) {
 		String tab = "";
-		for(int i = 0; i < tabs; i++)
+		for (int i = 0; i < tabs; i++)
 			tab += "   ";
-		
-		String ret = tab + "SEQUENCE DIAGRAM\n";
-		ret +=  tab + "\tName: " + name + "\n";
-		ret +=  tab + "\tLifelines:\n";
+
+		String ret = "   >>SEQUENCE DIAGRAM<<\n";
+		ret += tab + "Name: " + name + "\n";
+		ret += tab + "Lifelines:\n";
 		for (Lifeline element : lifelines)
-			ret +=  tab + "\t\t" + element.toString(tabs + 1) + "\n";
-		ret +=  tab + "\tCombined fragments:\n";
+			ret += tab + element.toString(tabs + 1) + "\n";
+		ret += tab + "Combined fragments:\n";
 		for (CF element : cfs)
-			ret +=  tab + "\t\t" + element.toString(tabs + 1) + "\n";
+			ret += tab + element.toString(tabs + 1) + "\n";
 
 		return ret;
 	}

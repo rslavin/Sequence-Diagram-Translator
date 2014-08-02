@@ -55,47 +55,58 @@ public class EU {
 			return operand.constraint.num;
 		return -1;
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		return this.toString(0);
 	}
 
 	public String toString(int tabs) {
 		String tab = "";
-		for(int i = 0; i < tabs; i++)
+		for (int i = 0; i < tabs; i++)
 			tab += "   ";
-		
-		String ret = tab + "EU\n";
-		ret += tab + "\tName: " + name + "\n";
-		ret += tab + "\tLifeline: " + lifeline.name + "\n";
-		ret += tab + "\tOperand: " + operand.constraint.constraint + "\n";
-		ret += tab + "\tDirected OSes:\n";
-		for (OS element : directedOSes)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tDirected CEUes:\n";
-		for (CEU element : directedCEUs)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tConnected EUs:\n";
-		for (EU element : connectedEUs)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tCovered EU labels:\n";
-		for (String element : coveredEULabels)
-			ret += tab + "\t\t" + element + "\n";
-		ret += tab + "\tStates:\n";
-		for (String element : states)
-			ret += tab + "\t\t" + element + "\n";
-		ret += tab + "\tOrdereds:\n";
-		for (Ordered element : ordereds)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tIgnored OSes:\n";
-		for (OS element : ignoreOSes)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tConsidered OSes:\n";
-		for (OS element : consideredOSes)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tAll possible OSes:\n";
-		for (OS element : allPossibleOSes)
-			ret += tab + "\t\t" + element.name + "\n";
+
+		String ret = "   >>EU<<\n";
+		ret += tab + "Name: " + name + "\n";
+		if (lifeline != null)
+			ret += tab + "Lifeline: " + lifeline.name + "\n";
+		if (operand != null)
+			ret += tab + "Operand: " + operand.constraint.constraint + "\n";
+		ret += tab + "Directed OSes:\n";
+		if (directedOSes != null)
+			for (OS element : directedOSes)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Directed CEUes:\n";
+		if (directedCEUs != null)
+			for (CEU element : directedCEUs)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Connected EUs:\n";
+		if (connectedEUs != null)
+			for (EU element : connectedEUs)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Covered EU labels:\n";
+		if (coveredEULabels != null)
+			for (String element : coveredEULabels)
+				ret += tab + "   " + element + "\n";
+		ret += tab + "States:\n";
+		if (states != null)
+			for (String element : states)
+				ret += tab + "   " + element + "\n";
+		ret += tab + "   Ordereds:\n";
+		if (ordereds != null)
+			for (Ordered element : ordereds)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Ignored OSes:\n";
+		if (ignoreOSes != null)
+			for (OS element : ignoreOSes)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Considered OSes:\n";
+		if (consideredOSes != null)
+			for (OS element : consideredOSes)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "All possible OSes:\n";
+		if (allPossibleOSes != null)
+			for (OS element : allPossibleOSes)
+				ret += tab + "   " + element.name + "\n";
 
 		return ret;
 	}

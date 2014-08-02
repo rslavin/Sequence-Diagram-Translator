@@ -17,6 +17,8 @@ public enum Operator {
 			return ALT;
 		else if (op.equals("opt") || op.equals("optional"))
 			return OPT;
+		else if (op.equals("par"))
+			return PAR;
 		else if (op.equals("loop"))
 			return LOOP;
 		else if (op.equals("assert"))
@@ -43,6 +45,8 @@ public enum Operator {
 		switch (this) {
 		case ALT:
 			return "alt";
+		case PAR:
+			return "par";
 		case OPT:
 			return "opt";
 		case LOOP:

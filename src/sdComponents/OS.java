@@ -2,6 +2,10 @@ package sdComponents;
 
 import java.util.List;
 
+import org.w3c.dom.Element;
+import org.w3c.dom.NodeList;
+
+import translators.XMLParser;
 import enums.*;
 
 /**
@@ -34,6 +38,31 @@ public class OS extends Ordered {
 		this.messageType = messageType;
 		this.iteration = 0;
 	}
+	
+	public OS(Lifeline lifeline,  String name, int number, OSType osType, MessageType messageType) {
+		this.lifeline = lifeline;
+		this.name = name;
+		this.number = number;
+		this.osType = osType;
+		this.messageType = messageType;
+		this.iteration = 0;
+	}
+	
+	public void parseConnectedLifeline(NodeList lifelineNodes, SD sequenceDiagram){
+		if (lifelineNodes != null && lifelineNodes.getLength() > 0) {
+			for (int i = 0; i < lifelineNodes.getLength(); i++) {
+				Element lfe = (Element) lifelineNodes.item(i);
+				if (lfe.getElementsByTagName("messageEvent") != null){
+					NodeList messageEvents = lfe.getElementsByTagName("messageEvent");
+					for(int j = 0; j < messageEvents.getLength(); j++){
+						if(XMLParser.elementValue((Element)messageEvents.item(j), "number").equals(Integer.toString(number)))
+							connectedLifeline = sequenceDiagram.getLifeline(XMLParser.elementValue((Element)messageEvents.item(j), "receiver"));
+							
+					}
+				}
+			}
+		}
+	}
 
 	/**
 	 * Generates label for statelist depending on if the OS sends or receives.
@@ -59,24 +88,29 @@ public class OS extends Ordered {
 		String tab = "";
 		for(int i = 0; i < tabs; i++)
 			tab += "   ";
-		
-		String ret = tab + "OS\n";
-		ret += tab + "\tNumber: " + number + "\n";
-		ret += tab + "\tLifeline: " + connectedLifeline + "\n";
-		ret += tab + "\tOS Type: " + osType + "\n";
-		ret += tab + "\tMessage Type: " + messageType + "\n";
-		ret += tab + "\tLayer: " + layer + "\n";
-		ret += tab + "\tLocation: " + location + "\n";
-		ret += tab + "\tIteration: " + iteration + "\n";
-		ret += tab + "\tConstraints:\n";
+		String ret = "   >>OS<<\n";
+		ret += tab + "Number: " + number + "\n";
+		if(connectedLifeline != null)
+		ret += tab + "Lifeline: " + connectedLifeline.name + "\n";
+		if(osType != null)
+		ret += tab + "OS Type: " + osType + "\n";
+		if(messageType != null)
+		ret += tab + "Message Type: " + messageType + "\n";
+		ret += tab + "Layer: " + layer + "\n";
+		ret += tab + "Location: " + location + "\n";
+		ret += tab + "Iteration: " + iteration + "\n";
+		ret += tab + "Constraints:\n";
+		if(constraints != null)
 		for (Constraint element : constraints)
-			ret += tab + "\t\t" + element.constraint + "\n";
-		ret += tab + "\tParents:\n";
+			ret += tab + "   " + element.constraint + "\n";
+		ret += tab + "Parents:\n";
+		if(parents != null)
 		for (String element : parents)
-			ret += tab + "\t\t" + element + "\n";
-		ret += tab + "\tConnected parents:\n";
+			ret += tab + "   " + element + "\n";
+		ret += tab + "Connected parents:\n";
+		if(connectedParents != null)
 		for (String element : connectedParents)
-			ret += tab + "\t\t" + element + "\n";
+			ret += tab + "   " + element + "\n";
 
 		return ret;
 	}

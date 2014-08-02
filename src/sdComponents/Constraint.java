@@ -35,14 +35,14 @@ public class Constraint {
 		for (int i = 0; i < tabs; i++)
 			tab += "   ";
 
-		String ret = tab + "CONSTRAINT\n";
-		ret += tab + "\tConstraint: " + constraint + "\n";
-		ret += tab + "\tLifeline: " + lifeline + "\n";
-		ret += tab + "\tEU: " + eu.name + "\n";
-		ret += tab + "\tEU Label: " + euLabel + "\n";
-		ret += tab + "\tNumber: " + num + "\n";
-		ret += tab + "\tMax iteration: " + maxIteration + "\n";
-		ret += tab + "\tMin iteration: " + minIteration + "\n";
+		String ret = "   >>CONSTRAINT<<\n";
+		ret += tab + "Constraint: " + constraint + "\n";
+		ret += tab + "Lifeline: " + lifeline + "\n";
+		ret += tab + "EU: " + eu.name + "\n";
+		ret += tab + "EU Label: " + euLabel + "\n";
+		ret += tab + "Number: " + num + "\n";
+		ret += tab + "Max iteration: " + maxIteration + "\n";
+		ret += tab + "Min iteration: " + minIteration + "\n";
 
 		return ret;
 	}

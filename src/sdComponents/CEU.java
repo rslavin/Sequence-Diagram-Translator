@@ -94,49 +94,60 @@ public class CEU extends Ordered {
 		}
 		return null;
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		return this.toString(0);
 	}
 
 	public String toString(int tabs) {
 		String tab = "";
-		for(int i = 0; i < tabs; i++)
+		for (int i = 0; i < tabs; i++)
 			tab += "   ";
-		String ret = tab + "CEU\n";
-		ret += tab + "\tName: " + name + "\n";
-		ret += tab + "\tCombined Fragment: " + cf.num + "\n";
-		ret += tab + "\tHas critical child: " + hasCriticalChild;
-		ret += tab + "\tFirst OS: " + firstOS.name;
-		ret += tab + "\tIteration: " + iteration;
-		ret += tab + "\tIs parent of parent: " + isParentPar;
-		ret += tab + "\tEUs:\n";
-		for (EU element : eus)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tCovered Lifeline Names:\n";
-		for (String element : coveredLifelineNames)
-			ret += tab + "\t\t" + element + "\n";
-		ret += tab + "\tCovered Operators:\n";
-		for (Operator element : coveredOperators)
-			ret += tab + "\t\t" + element + "\n";
-		ret += tab + "\tCovered Constraints:\n";
-		for (Constraint element : coveredConstraints)
-			ret += tab + "\t\t" + element.constraint + "\n";
-		ret += tab + "\tPre OSes:\n";
-		for (OS element : preOSes)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tPost OSes:\n";
-		for (OS element : postOSes)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tParent CEUs:\n";
-		for (CEU element : parentCEUs)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tEU iterations:\n";
-		for (EU element : euIterations)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tConnected CEUs:\n";
-		for (CEU element : connectedCEUs)
-			ret += tab + "\t\t" + element.name + "\n";
+		String ret = "   >>CEU<<\n";
+		ret += tab + "Name: " + name + "\n";
+		if (cf != null)
+			ret += tab + "Combined Fragment: " + cf.num + "\n";
+		ret += tab + "Has critical child: " + hasCriticalChild + "\n";
+		if (firstOS != null)
+			ret += tab + "First OS: " + firstOS.name + "\n";
+		ret += tab + "Iteration: " + iteration + "\n";
+		ret += tab + "Is parent of parent: " + isParentPar + "\n";
+		ret += tab + "EUs:\n";
+		if (eus != null)
+			for (EU element : eus)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Covered Lifeline Names:\n";
+		if (coveredLifelineNames != null)
+			for (String element : coveredLifelineNames)
+				ret += tab + "   " + element + "\n";
+		ret += tab + "Covered Operators:\n";
+		if (coveredOperators != null)
+			for (Operator element : coveredOperators)
+				ret += tab + "   " + element + "\n";
+		ret += tab + "Covered Constraints:\n";
+		if (coveredConstraints != null)
+			for (Constraint element : coveredConstraints)
+				ret += tab + "   " + element.constraint + "\n";
+		ret += tab + "Pre OSes:\n";
+		if (preOSes != null)
+			for (OS element : preOSes)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Post OSes:\n";
+		if (postOSes != null)
+			for (OS element : postOSes)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Parent CEUs:\n";
+		if (parentCEUs != null)
+			for (CEU element : parentCEUs)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "EU iterations:\n";
+		if (euIterations != null)
+			for (EU element : euIterations)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Connected CEUs:\n";
+		if (connectedCEUs != null)
+			for (CEU element : connectedCEUs)
+				ret += tab + "   " + element.name + "\n";
 
 		return ret;
 	}

@@ -43,8 +43,9 @@ public class CF {
 		ArrayList<Integer> msgs = new ArrayList<Integer>();
 		for (Operand op : operands) {
 			msgs.addAll(op.msgNums);
-			for (CF opCF : op.cfs)
-				msgs.addAll(opCF.getAllMsgNums());
+			if (op.cfs != null)
+				for (CF opCF : op.cfs)
+					msgs.addAll(opCF.getAllMsgNums());
 		}
 		return msgs;
 	}
@@ -52,31 +53,38 @@ public class CF {
 	public String toString() {
 		return this.toString(0);
 	}
-	
+
 	public String toString(int tabs) {
 		String tab = "";
-		for(int i = 0; i < tabs; i++)
+		for (int i = 0; i < tabs; i++)
 			tab += "   ";
-		
-		String ret = tab + "CF\n";
-		ret += tab + "\tNumber: " + num + "\n";
-		ret += tab + "\tOperator: " + operator + "\n";
-		ret += tab + "\tFirst OS: " + firstOS.name + "\n";
-		ret += tab + "\tLifelines:\n";
-		for (Lifeline element : lifelines)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tOperands:\n";
-		for (Operand element : operands)
-			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
-		ret += tab + "\tCEUs:\n";
-		for (CEU element : ceus)
-			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
-		ret += tab + "\tOSes:\n";
-		for (OS element : oses)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += "\tIterations:\n";
-		for (Operand element : operands)
-			ret += tab + "\t\t" + element.constraint.constraint + "\n";
+
+		String ret = "   >>CF<<\n";
+		ret += tab + "Number: " + num + "\n";
+		if (operator != null)
+			ret += tab + "Operator: " + operator + "\n";
+		if (firstOS != null)
+			ret += tab + "First OS: " + firstOS.name + "\n";
+		ret += tab + "Lifelines:\n";
+		if (lifelines != null)
+			for (Lifeline element : lifelines)
+				ret += tab + "   " + element.name + "\n";
+		ret += tab + "Operands:\n";
+		if (operands != null)
+			for (Operand element : operands)
+				ret += tab + element.toString(tabs + 1) + "\n";
+		ret += tab + "CEUs:\n";
+		if (ceus != null)
+			for (CEU element : ceus)
+				ret += tab + element.toString(tabs + 1) + "\n";
+		ret += tab + "OSes:\n";
+		if (oses != null)
+			for (OS element : oses)
+				ret += tab + "   " + element.name + "\n";
+		ret += "Iterations:\n";
+		if (operands != null)
+			for (Operand element : operands)
+				ret += tab + "   " + element.constraint.constraint + "\n";
 
 		return ret;
 	}

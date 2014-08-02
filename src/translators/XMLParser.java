@@ -45,7 +45,8 @@ public class XMLParser {
 			// get list of SDs
 			NodeList SDList = root.getElementsByTagName("sequenceDiagram");
 			if (SDList != null && SDList.getLength() > 0)
-				sequenceDiagram = parseSequenceDiagram((Element) SDList.item(0));
+				parseSequenceDiagram((Element) SDList.item(0));
+
 		} catch (Exception e) {
 			e.printStackTrace();
 		}
@@ -61,16 +62,15 @@ public class XMLParser {
 	 * @return Returns the root sequence diagram object.
 	 */
 	private static SD parseSequenceDiagram(Element xmlElement) {
-		List<Lifeline> lifelines = new ArrayList<Lifeline>();
-		List<CF> cfs = new ArrayList<CF>();
 
+		sequenceDiagram = new SD(elementValue(xmlElement, "name"));
 		// populate lifeline list
 		NodeList lifelineNodes = xmlElement.getElementsByTagName("lifeline");
 		if (lifelineNodes != null && lifelineNodes.getLength() > 0) {
 			for (int i = 0; i < lifelineNodes.getLength(); i++) {
 				Element lfe = (Element) lifelineNodes.item(i);
-				if (lfe.getElementsByTagName("type") != null)
-					lifelines.add(parseLifeline(lfe));
+				if (lfe.getElementsByTagName("type").getLength() > 0)
+					sequenceDiagram.lifelines.add(parseLifeline(lfe));
 			}
 		} else
 			System.err.println("parseSequenceDiagram(): no lifelines found");
@@ -79,28 +79,29 @@ public class XMLParser {
 		NodeList cfNodes = xmlElement.getElementsByTagName("combinedFragment");
 		if (cfNodes != null && cfNodes.getLength() > 0) {
 			for (int i = 0; i < cfNodes.getLength(); i++)
-				cfs.add(parseCF((Element) cfNodes.item(i)));
+				sequenceDiagram.cfs.add(parseCF((Element) cfNodes.item(i)));
 		} else
 			System.err.println("parseSequenceDiagram(): no combined fragments found");
 
-		// create SD object
-		SD sequenceDiagram = new SD(xmlElement.getAttribute("name"), lifelines, cfs);
-
 		// generate list of sending OSes (one OS per message)
 		List<Integer> allMessages = new ArrayList<Integer>();
-		for (int i = 0; i < lifelines.size(); i++) {
-			Lifeline curLifeline = lifelines.get(i);
+		for (int i = 0; i < sequenceDiagram.lifelines.size(); i++) {
+			Lifeline curLifeline = sequenceDiagram.lifelines.get(i);
 			for (int j = 0; j < curLifeline.oses.size(); j++) {
 				OS curOS = curLifeline.oses.get(j);
 				if (curOS.osType == OSType.SEND)
 					allMessages.add(curOS.number);
 			}
 		}
-		for (Lifeline curLifeline : lifelines) {
+		for (Lifeline curLifeline : sequenceDiagram.lifelines)
 			for (OS curOS : curLifeline.oses)
 				if (curOS.osType == OSType.SEND)
 					allMessages.add(curOS.number);
-		}
+
+		// parse connected lifelines
+		for (Lifeline curLifeline : sequenceDiagram.lifelines)
+			for (OS curOS : curLifeline.oses)
+				curOS.parseConnectedLifeline(lifelineNodes, sequenceDiagram);
 
 		// remove from allMessages any messages that appear in AllCFMsg
 		allMessages.removeAll(getAllCFMsg((ArrayList<CF>) sequenceDiagram.cfs));
@@ -122,8 +123,7 @@ public class XMLParser {
 	 * @return Lifeline object
 	 */
 	private static Lifeline parseLifeline(Element xmlElement) {
-		Lifeline lifeline = new Lifeline(xmlElement.getAttribute("roleName"), xmlElement.getAttribute("type"));
-
+		Lifeline lifeline = new Lifeline(elementValue(xmlElement, "roleName"), elementValue(xmlElement, "type"));
 		// parse OSes from messageEvent xml tags belonging to the Lifeline
 		NodeList xmlMessageEvents = xmlElement.getElementsByTagName("messageEvent");
 		if (xmlMessageEvents != null && xmlMessageEvents.getLength() > 0) {
@@ -131,7 +131,7 @@ public class XMLParser {
 				lifeline.oses.add(parseOS((Element) xmlMessageEvents.item(i), lifeline));
 			}
 		} else
-			System.err.println("parsLifeline(): No messages found for lifeline " + lifeline.name);
+			System.err.println("parseLifeline(): No messages found for lifeline " + lifeline.name);
 
 		return lifeline;
 	}
@@ -148,11 +148,12 @@ public class XMLParser {
 		// get Lifelines; parseCF MUST be called after Lifelines have been
 		// parsed.
 		List<Lifeline> lifelines = new ArrayList<Lifeline>();
-		NodeList xmlLifelines = xmlElement.getElementsByTagName("lifelines");
+		NodeList xmlLifelineGroup = xmlElement.getElementsByTagName("lifelines");
+		NodeList xmlLifelines = ((Element) xmlLifelineGroup.item(0)).getElementsByTagName("lifeline");
 		for (int i = 0; i < xmlLifelines.getLength(); i++) {
 			// find Lifelines in sequenceDiagram that corresponds to the name
 			// values in xmlLifelines
-			Lifeline currentLifeline = sequenceDiagram.getLifeline(xmlLifelines.item(i).getNodeValue());
+			Lifeline currentLifeline = sequenceDiagram.getLifeline(xmlLifelines.item(i).getFirstChild().getNodeValue());
 			if (currentLifeline != null)
 				lifelines.add(currentLifeline);
 			else
@@ -166,7 +167,7 @@ public class XMLParser {
 		for (int i = 0; i < xmlOperands.getLength(); i++)
 			operands.add(parseOperand((Element) xmlOperands.item(i), lifelines));
 
-		return new CF(Operator.getOperator(xmlElement.getAttribute("operator")), lifelines, operands);
+		return new CF(Operator.getOperator(elementValue(xmlElement, "operator")), lifelines, operands);
 	}
 
 	/**
@@ -180,9 +181,8 @@ public class XMLParser {
 	 * @return OS portion of messageEvent belonging to lifeline.
 	 */
 	private static OS parseOS(Element xmlElement, Lifeline lifeline) {
-		return new OS(lifeline, sequenceDiagram.getLifeline(xmlElement.getAttribute("receiver")),
-				xmlElement.getAttribute("name"), Integer.parseInt(xmlElement.getAttribute("number")), OSType.RECEIVE,
-				MessageType.getMessageType(xmlElement.getAttribute("type")));
+		return new OS(lifeline, elementValue(xmlElement, "name"), Integer.parseInt(elementValue(xmlElement, "number")),
+				OSType.RECEIVE, MessageType.getMessageType(elementValue(xmlElement, "type")));
 	}
 
 	/**
@@ -206,17 +206,19 @@ public class XMLParser {
 
 		// find messageEvents
 		List<Integer> msgNums = new ArrayList<Integer>();
-		NodeList xmlMsgEvents = xmlElement.getElementsByTagName("messageEvents");
+		NodeList xmlMsgEventsList = xmlElement.getElementsByTagName("messageEvents");
+		NodeList xmlMsgEvents = ((Element) xmlMsgEventsList.item(0)).getElementsByTagName("number");
 		if (xmlMsgEvents != null && xmlMsgEvents.getLength() > 0) {
-			for (int i = 0; i < xmlMsgEvents.getLength(); i++)
-				msgNums.add(Integer.parseInt(xmlMsgEvents.item(i).getNodeValue()));
+			for (int i = 0; i < xmlMsgEvents.getLength(); i++) {
+				msgNums.add(Integer.parseInt(xmlMsgEvents.item(i).getFirstChild().getNodeValue()));
+			}
 			Collections.sort(msgNums);
 		}
 
 		// create Constraint
 		Element xmlConstraint = (Element) xmlElement.getElementsByTagName("condition").item(0);
-		Constraint constraint = new Constraint(xmlConstraint.getAttribute("name"), sequenceDiagram.getLifeline(xmlConstraint
-				.getAttribute("lifeline")));
+		Constraint constraint = new Constraint(elementValue(xmlConstraint, "name"), sequenceDiagram.getLifeline(elementValue(
+				xmlConstraint, "lifeline")));
 
 		return new Operand(constraint, new ArrayList<Lifeline>(lifelines), msgNums);
 	}
@@ -279,7 +281,8 @@ public class XMLParser {
 							if (outerOS.number == innerOS.number)
 								// assign its parents as connected Parents to
 								// the first OS
-								outerOS.connectedParents = new ArrayList<String>(innerOS.parents);
+								if (innerOS.parents != null)
+									outerOS.connectedParents = new ArrayList<String>(innerOS.parents);
 
 	}
 
@@ -322,7 +325,8 @@ public class XMLParser {
 								break;
 							}
 						}
-						findMsgInEU(lifeline, cfOperand.cfs, newLayer, newParents);
+						if (cfOperand.cfs != null && cfOperand.cfs.size() > 0)
+							findMsgInEU(lifeline, cfOperand.cfs, newLayer, newParents);
 					}
 				}
 			}
@@ -476,21 +480,26 @@ public class XMLParser {
 			else {
 				for (int i = 0; i < ordereds.size(); i++) {
 					Ordered ord = ordereds.get(i);
-					if (i == ordereds.size() - 1)
-						ordereds.add(ceu);
-					else if (ord instanceof OS) {
-						OS tempOS = (OS) ord;
-						if (ceu.getFirstOS().number < tempOS.number) {
-							ordereds.add(i, ceu);
-							break;
+					if (ceu.getFirstOS() != null) // temp fix
+						if (ord instanceof OS) {
+							OS tempOS = (OS) ord;
+							if (ceu.getFirstOS().number < tempOS.number) {
+								ordereds.add(i, ceu);
+								break;
+							} else if (i == ordereds.size()) {
+								ordereds.add(ceu);
+								break;
+							}
+						} else { // CEU
+							CEU tempCEU = (CEU) ord;
+							if (ceu.getFirstOS().number < tempCEU.getFirstOS().number) {
+								ordereds.add(i, ceu);
+								break;
+							} else if (i == ordereds.size()) {
+								ordereds.add(ceu);
+								break;
+							}
 						}
-					} else { // CEU
-						CEU tempCEU = (CEU) ord;
-						if (ceu.getFirstOS().number < tempCEU.getFirstOS().number) {
-							ordereds.add(i, ceu);
-							break;
-						}
-					}
 				}
 			}
 			for (EU ceuEU : ceu.eus)
@@ -725,5 +734,23 @@ public class XMLParser {
 				assertions.addAll(buildAssertions((ArrayList<CEU>) ceuEU.directedCEUs, assertions));
 		}
 		return assertions;
+	}
+
+	/**
+	 * Returns value between tags marked "key"
+	 * 
+	 * @param e
+	 *            Element with tags.
+	 * @param key
+	 *            Key with value.
+	 * @return First value corresponding to key.
+	 */
+	public static String elementValue(Element e, String key) {
+		// for each of the Element's children
+		for (int i = 0; i < e.getChildNodes().getLength(); i++)
+			// check if the node's name equals the key
+			if (e.getChildNodes().item(i).getNodeName().equals(key))
+				return (e.getChildNodes().item(i).getFirstChild().getNodeValue());
+		return null;
 	}
 }

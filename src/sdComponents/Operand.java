@@ -1,5 +1,6 @@
 package sdComponents;
 
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -22,32 +23,36 @@ public class Operand {
 		this.constraint = constraint;
 		this.lifelines = lifelines;
 		this.msgNums = msgNums;
+		this.cfs = new ArrayList<CF>();
+		this.lifelines = new ArrayList<Lifeline>();
+		this.eus = new ArrayList<EU>();
+		this.msgNums = new ArrayList<Integer>();
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		return this.toString(0);
 	}
-	
-	public String toString(int tabs){
+
+	public String toString(int tabs) {
 		String tab = "";
-		for(int i = 0; i < tabs; i++)
+		for (int i = 0; i < tabs; i++)
 			tab += "   ";
-		
-		String ret = tab + "OPERAND\n";
-		ret += tab + "\tConstraint: " + constraint.constraint + "\n";
-		ret += tab + "\tCombined fragments:\n";
+
+		String ret = "   >>OPERAND<<\n";
+		ret += tab + "Constraint: " + constraint.constraint + "\n";
+		ret += tab + "Combined fragments:\n";
 		for (CF element : cfs)
-			ret += tab + "\t\t" + element.num + "\n";
-		ret += tab + "\tLifelines:\n";
+			ret += tab + "   " + element.num + "\n";
+		ret += tab + "Lifelines:\n";
 		for (Lifeline element : lifelines)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tEUs: \n";
+			ret += tab + "   " + element.name + "\n";
+		ret += tab + "EUs: \n";
 		for (EU element : eus)
-			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
-		ret += tab + "\tMessage numbers:\n";
+			ret +=  tab + element.toString(tabs + 1) + "\n";
+		ret += tab + "Message numbers:\n";
 		for (int element : msgNums)
-			ret += tab + "\t\t" + element + "\n";
-		
+			ret += tab + "   " + element + "\n";
+
 		return ret;
 	}
 

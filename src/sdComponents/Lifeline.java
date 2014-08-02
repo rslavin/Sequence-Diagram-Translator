@@ -1,6 +1,8 @@
 package sdComponents;
 
+import java.util.ArrayList;
 import java.util.List;
+
 import enums.OSType;
 
 /**
@@ -11,7 +13,7 @@ import enums.OSType;
  *         sending and receiving OSes.
  * 
  */
-public class Lifeline{
+public class Lifeline {
 	public String name;
 	public String type; // unsure
 
@@ -28,6 +30,14 @@ public class Lifeline{
 	public Lifeline(String name, String type) {
 		this.name = name;
 		this.type = type;
+		this.oses = new ArrayList<OS>();
+		this.directedOSes = new ArrayList<OS>();
+		this.directedCEUs = new ArrayList<CEU>();
+		this.connectedLifelines = new ArrayList<Lifeline>();
+		this.orderedElements = new ArrayList<Ordered>();
+		this.states = new ArrayList<String>();
+		this.criticals = new ArrayList<EU>();
+		this.assertions = new ArrayList<EU>();
 	}
 
 	public Lifeline(Lifeline clone) {
@@ -87,44 +97,59 @@ public class Lifeline{
 				return true;
 		return false;
 	}
-	
-	public String toString(){
+
+	public String toString() {
 		return this.toString(0);
 	}
-	
-	public String toString(int tabs){
+
+	public String toString(int tabs) {
 		String tab = "";
-		for(int i = 0; i < tabs; i++)
+		for (int i = 0; i < tabs; i++)
 			tab += "   ";
-		
-		String ret = tab + "LIFELINE\n";
-		ret += tab + "\tName: " + name + "\n";
-		ret += tab + "\tType: " + type + "\n";
-		ret += tab + "\tOSes:\n";
-		for(OS element : oses)
-			ret += tab + "\t\t" + element.toString(tabs + 1) + "\n";
-		ret += tab + "\tDirected OSes:\n";
-		for(OS element : directedOSes)
-			ret += tab + "\t\t" + element.name + "\n";
+
+		String ret = "   >>LIFELINE<<\n";
+		ret += tab + "Name: " + name + "\n";
+		ret += tab + "Type: " + type + "\n";
+		ret += tab + "OSes:\n";
+		if (oses != null)
+			for (OS element : oses)
+				ret += tab + element.toString(tabs + 1) + "\n";
+
+		ret += tab + "Directed OSes:\n";
+		if (directedOSes != null)
+			for (OS element : directedOSes)
+				ret += tab + "   " + element.name + "\n";
+
 		ret += tab + "Directed CEUs:\n";
-		for(CEU element : directedCEUs)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tConnected Lifelines:\n";
-		for(Lifeline element : connectedLifelines)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tOrdered Elements:\n";
-		for(Ordered element : orderedElements)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tStates:\n";
-		for(String element : states)
-			ret += tab + "\t\t" + element + "\n";
-		ret += tab + "\tCriticals:\n";
-		for(EU element : criticals)
-			ret += tab + "\t\t" + element.name + "\n";
-		ret += tab + "\tOSes:\n";
-		for(EU element : assertions)
-			ret += tab + "\t\t" + element.name + "\n";		
-		
+		if (directedCEUs != null)
+			for (CEU element : directedCEUs)
+				ret += tab + "   " + element.name + "\n";
+
+		ret += tab + "Connected Lifelines:\n";
+		if (connectedLifelines != null)
+			for (Lifeline element : connectedLifelines)
+				ret += tab + "      " + element.name + "\n";
+
+		ret += tab + "Ordered Elements:\n";
+		if (orderedElements != null)
+			for (Ordered element : orderedElements)
+				ret += tab + "   " + element.name + "\n";
+
+		ret += tab + "States:\n";
+		if (states != null)
+			for (String element : states)
+				ret += tab + "   " + element + "\n";
+
+		ret += tab + "Criticals:\n";
+		if (criticals != null)
+			for (EU element : criticals)
+				ret += tab + "   " + element.name + "\n";
+
+		ret += tab + "OSes:\n";
+		if (assertions != null)
+			for (EU element : assertions)
+				ret += tab + "   " + element.name + "\n";
+
 		return ret;
 	}
 
