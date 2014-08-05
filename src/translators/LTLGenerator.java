@@ -1,5 +1,7 @@
 package translators;
 
+import sdComponents.SD;
+
 /**
  * 
  * @author Rocky Slavin
@@ -10,4 +12,13 @@ package translators;
  */
 public class LTLGenerator {
 
+	public static String generateLTL(SD sequnceDiagram, boolean alpha2, boolean epsilon){
+		String ltl = "";
+		// for each Lifeline in sequenceDiagram, print alpha and beta
+		
+		// for each CF in sequenceDiagram, print Phi
+		
+		// if epsilon, print epsilon
+		return ltl;
+	}
 }
