@@ -90,6 +90,7 @@ public class OS extends Ordered {
 		for (int i = 0; i < tabs; i++)
 			tab += "   ";
 		String ret = "   >>OS<<\n";
+		ret += tab + "Message name: " + name + "\n";
 		ret += tab + "Number: " + number + "\n";
 		if (lifeline != null)
 			ret += tab + "Lifeline: " + lifeline.name + "\n";
@@ -118,4 +119,31 @@ public class OS extends Ordered {
 		return ret;
 	}
 
+	/**
+	 * Generates string for use in LTL formulas. Embeds OSType into name.
+	 * 
+	 * @return
+	 */
+	public String ltlString() {
+		switch (osType) {
+		case SEND:
+			return "OS_s_" + name;
+		default:
+			return "OS_r_" + name;
+		}
+	}
+
+	/**
+	 * Generates string for use in LTL formulas where the opposite OS is needed.
+	 * 
+	 * @return
+	 */
+	public String ltlStringOp() {
+		switch (osType) {
+		case SEND:
+			return "OS_r_" + name;
+		default:
+			return "OS_s_" + name;
+		}
+	}
 }
