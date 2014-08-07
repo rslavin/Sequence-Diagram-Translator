@@ -3,8 +3,7 @@ package drivers;
 import java.io.File;
 
 import sdComponents.SD;
-import translators.LTLGenerator;
-import translators.XMLParser;
+import translators.*;
 
 public class Tester {
 	private static SD sequenceDiagram;
@@ -15,6 +14,7 @@ public class Tester {
 		//parseXML(true);
 		testParser();
 		generateLTL();
+		generateVars();
 
 	}
 
@@ -40,5 +40,9 @@ public class Tester {
 
 	private static void generateLTL() {
 		System.out.println(LTLGenerator.generateLTL(sequenceDiagram, true, true));
+	}
+	
+	private static void generateVars(){
+		System.out.println(ModelGenerator.generateVars(sequenceDiagram));
 	}
 }

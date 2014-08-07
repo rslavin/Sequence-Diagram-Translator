@@ -16,7 +16,7 @@ import translators.ltl.Utils;
  */
 public class LTLGenerator {
 	private static final boolean ALPHA2 = true;
-	private static final boolean DEBUG = true;
+	private static final boolean DEBUG = false;
 	
 
 	public static String generateLTL(SD sequenceDiagram, boolean alpha2, boolean epsilon){

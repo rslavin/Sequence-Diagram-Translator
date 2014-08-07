@@ -196,7 +196,9 @@ public class Formulas {
 		// for all EUs in all Lifelines in the operand
 		ArrayList<String> thetaConjuncts = new ArrayList<String>();
 		for (EU eu : op.eus) {
-			thetaConjuncts.add(alphaBar(eu, debug));
+			// TODO directedCEUs may need to be incorporated
+			if (eu.directedOSes != null && eu.directedOSes.size() > 0)
+				thetaConjuncts.add(alphaBar(eu, debug));
 			for (OS os : eu.directedOSes) {
 				if (os.osType.equals(OSType.SEND))
 					thetaConjuncts.add(betaBar(os, debug));
