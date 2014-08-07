@@ -65,5 +65,9 @@ public class Utils {
 		return "\r\n-- DEBUG: " + msg + "\r\n";
 
 	}
+	
+	public static String globally(String msg){
+		return "G (" + msg + ")";
+	}
 
 }

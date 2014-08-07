@@ -43,8 +43,8 @@ public class CF {
 		ArrayList<Integer> msgs = new ArrayList<Integer>();
 		for (Operand op : operands) {
 			msgs.addAll(op.msgNums);
-			if (op.cfs != null)
-				for (CF opCF : op.cfs)
+			if (op.nestedCFs != null)
+				for (CF opCF : op.nestedCFs)
 					msgs.addAll(opCF.getAllMsgNums());
 		}
 		return msgs;

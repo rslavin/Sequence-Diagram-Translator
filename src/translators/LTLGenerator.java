@@ -32,7 +32,10 @@ public class LTLGenerator {
 		ltl += "\n&\n" + Utils.conjunct(beta);
 		
 		// for each CF in sequenceDiagram, print Phi
-		
+		ArrayList<String> phi = new ArrayList<String>();
+		for(CF cf : sequenceDiagram.cfs)
+			phi.add(Formulas.phi(cf, DEBUG));
+		ltl += "\n&\n" + Utils.conjunct(phi);
 		// if epsilon, print epsilon
 		return ltl;
 	}

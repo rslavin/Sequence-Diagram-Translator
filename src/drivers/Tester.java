@@ -12,7 +12,8 @@ public class Tester {
 
 	public static void main(String[] args) {
 
-		parseXML(true);
+		//parseXML(true);
+		testParser();
 		generateLTL();
 
 	}

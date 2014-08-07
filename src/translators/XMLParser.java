@@ -83,6 +83,11 @@ public class XMLParser {
 				sequenceDiagram.cfs.add(parseCF((Element) cfNodes.item(i)));
 		} else
 			System.err.println("parseSequenceDiagram(): no combined fragments found");
+		
+		// associate CFs with operands
+		for(CF cf : sequenceDiagram.cfs)
+			for(Operand operand : cf.operands)
+				operand.cf = cf;
 
 		// generate list of sending OSes (one OS per message)
 		List<Integer> allMessages = new ArrayList<Integer>();
@@ -223,6 +228,7 @@ public class XMLParser {
 		Operand op = new Operand(constraint);
 		op.lifelines = new ArrayList<Lifeline>(lifelines);
 		op.msgNums = msgNums;
+		op.nestedCFs = combinedFragments;
 		return op;
 	}
 
@@ -328,8 +334,8 @@ public class XMLParser {
 								break;
 							}
 						}
-						if (cfOperand.cfs != null && cfOperand.cfs.size() > 0)
-							findMsgInEU(lifeline, cfOperand.cfs, newLayer, newParents);
+						if (cfOperand.nestedCFs != null && cfOperand.nestedCFs.size() > 0)
+							findMsgInEU(lifeline, cfOperand.nestedCFs, newLayer, newParents);
 					}
 				}
 			}
@@ -443,10 +449,10 @@ public class XMLParser {
 						}
 
 						// handle nested cfs
-						if (cfOperand.cfs.size() > 0) {
+						if (cfOperand.nestedCFs.size() > 0) {
 							List<CEU> opParentCEUs = new ArrayList<CEU>();
 							opParentCEUs.add(ceu);
-							eu.directedCEUs = generateCEUs(cfLifeline, (ArrayList<CF>) cfOperand.cfs, parents,
+							eu.directedCEUs = generateCEUs(cfLifeline, (ArrayList<CF>) cfOperand.nestedCFs, parents,
 									(ArrayList<CEU>) opParentCEUs);
 						}
 						ceu.eus.add(eu);
@@ -576,7 +582,7 @@ public class XMLParser {
 				}
 
 			for (Operand op : cf.operands)
-				buildConnectedEUs((ArrayList<CF>) op.cfs);
+				buildConnectedEUs((ArrayList<CF>) op.nestedCFs);
 		}
 	}
 
@@ -674,7 +680,7 @@ public class XMLParser {
 						}
 					}
 					cf.iterations.add(cfOp);
-					buildLoops((ArrayList<CF>) cfOp.cfs);
+					buildLoops((ArrayList<CF>) cfOp.nestedCFs);
 				}
 			}
 		}

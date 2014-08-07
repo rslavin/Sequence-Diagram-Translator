@@ -14,26 +14,30 @@ import java.util.List;
  */
 public class Operand {
 	public Constraint constraint;
-	public List<CF> cfs;
+	public CF cf;
+	public List<CF> nestedCFs;
 	public List<Lifeline> lifelines;
 	public List<EU> eus;
 	public List<Integer> msgNums;
 
-	public Operand(Constraint constraint){
+	public Operand(Constraint constraint) {
 		this.constraint = constraint;
-		this.cfs = new ArrayList<CF>();
+		this.cf = null;
 		this.lifelines = new ArrayList<Lifeline>();
 		this.eus = new ArrayList<EU>();
 		this.msgNums = new ArrayList<Integer>();
+		this.nestedCFs = new ArrayList<CF>();
 	}
+
 	public Operand(Constraint constraint, List<Lifeline> lifelines, List<Integer> msgNums) {
 		this.constraint = constraint;
 		this.lifelines = lifelines;
 		this.msgNums = msgNums;
-		this.cfs = new ArrayList<CF>();
+		this.cf = null;
 		this.lifelines = new ArrayList<Lifeline>();
 		this.eus = new ArrayList<EU>();
 		this.msgNums = new ArrayList<Integer>();
+		this.nestedCFs = new ArrayList<CF>();
 	}
 
 	public String toString() {
@@ -47,15 +51,17 @@ public class Operand {
 
 		String ret = "   >>OPERAND<<\n";
 		ret += tab + "Constraint: " + constraint.constraint + "\n";
-		ret += tab + "Combined fragments:\n";
-		for (CF element : cfs)
+		if (cf != null)
+			ret += tab + "Combined Fragment: " + cf.num + "\n";
+		ret += tab + "Nested combined fragments:\n";
+		for (CF element : nestedCFs)
 			ret += tab + "   " + element.num + "\n";
 		ret += tab + "Lifelines:\n";
 		for (Lifeline element : lifelines)
 			ret += tab + "   " + element.name + "\n";
 		ret += tab + "EUs: \n";
 		for (EU element : eus)
-			ret +=  tab + element.toString(tabs + 1) + "\n";
+			ret += tab + element.toString(tabs + 1) + "\n";
 		ret += tab + "Message numbers:\n";
 		for (int element : msgNums)
 			ret += tab + "   " + element + "\n";
