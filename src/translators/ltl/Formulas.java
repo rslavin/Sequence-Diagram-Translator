@@ -9,7 +9,7 @@ public class Formulas {
 	private boolean printAlpha2;
 	private boolean debug;
 
-	public Formulas(boolean printAlpha2,  boolean debug) {
+	public Formulas(boolean printAlpha2, boolean debug) {
 		this.printAlpha2 = printAlpha2;
 		this.debug = debug;
 	}
@@ -80,8 +80,9 @@ public class Formulas {
 	}
 
 	/**
-	 * Generates phi bar formula for a combined fragment. For cases other than LOOP
-	 * or ALT, phiBarOperand is called and conjuncted with eta, mu, and gamma.
+	 * Generates phi bar formula for a combined fragment. For cases other than
+	 * LOOP or ALT, phiBarOperand is called and conjuncted with eta, mu, and
+	 * gamma.
 	 * 
 	 * @param cf
 	 *            Combined fragment to generate phi bar formula for.
@@ -120,8 +121,8 @@ public class Formulas {
 	 * Generates phi bar formula for operands. Called by phi().
 	 * 
 	 * @param op
-	 *            Operand to generate phi bar formula for. Complete phi bar formula is
-	 *            a conjunction of ALL operands.
+	 *            Operand to generate phi bar formula for. Complete phi bar
+	 *            formula is a conjunction of ALL operands.
 	 * @return String representing phi bar formula for operand.
 	 */
 	public String phiBarOperand(Operand op) {
@@ -210,7 +211,32 @@ public class Formulas {
 	}
 
 	public String etaBar(CF cf) {
-		return "ETA BAR GOES HERE";
+		// for each lifeline in the cf
+		ArrayList<String> lifelineConjuncts = new ArrayList<String>();
+		for (Lifeline lifeline : cf.lifelines) {
+			ArrayList<String> preOSConjuncts = new ArrayList<String>();
+			// for each pre os for the CEU on the lifeline
+			// if pre and post ordereds exist
+			if (cf.lifelineCEU(lifeline) != null && cf.lifelineCEU(lifeline).preOrdereds != null
+					&& cf.lifelineCEU(lifeline).postOrdereds != null && cf.lifelineCEU(lifeline).preOrdereds.size() > 0
+					&& cf.lifelineCEU(lifeline).postOrdereds.size() > 0) {
+				CEU ceu = cf.lifelineCEU(lifeline);
+				for (Ordered preOS : ceu.preOrdereds) {
+					if (preOS instanceof OS) {
+						ArrayList<String> postOSConjuncts = new ArrayList<String>();
+						// for each post OS
+						for (Ordered postOS : ceu.postOrdereds) {
+							if (postOS instanceof OS) {
+								postOSConjuncts.add("!"+((OS) postOS).ltlString());
+							}
+						}// TODO is F correct?
+						preOSConjuncts.add("F " + ((OS) preOS).ltlString() + " -> (" + Utils.strongUntil("(" + Utils.conjunct(postOSConjuncts) + ")", ((OS)preOS).ltlString()) + ")" );
+					}
+				}
+				lifelineConjuncts.add("("+Utils.conjunct(preOSConjuncts) + ")");
+			}
+		}
+		return Utils.conjunct(lifelineConjuncts);
 	}
 
 	public String muBar(CF cf) {
@@ -218,9 +244,9 @@ public class Formulas {
 	}
 
 	/**
-	 * Generates alpha bar formula for an EU. Second half of alpha bar formula can be
-	 * dropped if printAlpha2 is set to false. This formula only applies to OSes
-	 * inside of combined fragments.
+	 * Generates alpha bar formula for an EU. Second half of alpha bar formula
+	 * can be dropped if printAlpha2 is set to false. This formula only applies
+	 * to OSes inside of combined fragments.
 	 * 
 	 * @param eu
 	 *            EU to generate alpha bar formula for.
