@@ -54,6 +54,21 @@ public class CF {
 		return this.toString(0);
 	}
 
+	/**
+	 * Finds CEU in CF belonging to lifeline.
+	 * 
+	 * @param lifeline
+	 *            Lifeline to find CEU for.
+	 * @return CEU belonging to lifeline, null if no CEU in CF belongs to
+	 *         lifeline.
+	 */
+	public CEU lifelineCEU(Lifeline lifeline) {
+		for (CEU ceu : ceus)
+			if (ceu.lifeline.equals(lifeline))
+				return ceu;
+		return null;
+	}
+
 	public String toString(int tabs) {
 		String tab = "";
 		for (int i = 0; i < tabs; i++)

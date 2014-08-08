@@ -1,28 +1,29 @@
 package translators.ltl;
 
 import java.util.ArrayList;
-import java.util.List;
 
 import enums.*;
 import sdComponents.*;
-import translators.LTLGenerator;
 
 public class Formulas {
+	private boolean printAlpha2;
+	private boolean debug;
+
+	public Formulas(boolean printAlpha2,  boolean debug) {
+		this.printAlpha2 = printAlpha2;
+		this.debug = debug;
+	}
 
 	/**
-	 * Generates alpha function. Second half of alpha function can be dropped if
+	 * Generates alpha formula. Second half of alpha formula can be dropped if
 	 * printAlpha2 is set to false. This formula only applies to OSes outside of
 	 * combined fragments.
 	 * 
 	 * @param lifeline
-	 *            Single lifeline for which to generate alpha function.
-	 * @param printAlpha2
-	 *            If false, second half of alpha function is left off.
-	 * @param debug
-	 *            Verbose mode.
-	 * @return String representing alpha function for lifeline.
+	 *            Single lifeline for which to generate alpha formula.
+	 * @return String representing alpha formula for lifeline.
 	 */
-	public static String alpha(Lifeline lifeline, boolean printAlpha2, boolean debug) {
+	public String alpha(Lifeline lifeline) {
 		String alpha = "";
 		if (debug)
 			alpha += Utils.debugPrint("Beginning Alpha for lifeline (" + lifeline.name + ") (alpha())");
@@ -44,8 +45,9 @@ public class Formulas {
 			ArrayList<String> alpha2 = new ArrayList<String>();
 			for (OS os : lifeline.oses)
 				alpha2.add("(!" + os.ltlString() + " U (" + os.ltlString() + " & X G !" + os.ltlString() + "))");
-
-			alpha += " & " + Utils.conjunct(alpha2);
+			if (alpha1.size() > 0)
+				alpha += " & ";
+			alpha += Utils.conjunct(alpha2);
 
 		}
 		if (debug)
@@ -54,16 +56,14 @@ public class Formulas {
 	}
 
 	/**
-	 * Generates beta function for lifeline. This formula only applies to OSes
+	 * Generates beta formula for lifeline. This formula only applies to OSes
 	 * outside of combined fragments.
 	 * 
 	 * @param lifeline
-	 *            Lifeline for which to generate beta function
-	 * @param debug
-	 *            Verbose mode.
-	 * @return
+	 *            Lifeline for which to generate beta formula
+	 * @return String representing beta formula for lifeline.
 	 */
-	public static String beta(Lifeline lifeline, boolean debug) {
+	public String beta(Lifeline lifeline) {
 		String beta = "";
 		if (debug)
 			beta += Utils.debugPrint("Beginning Beta for lifeline (" + lifeline.name + ") (beta())");
@@ -80,16 +80,14 @@ public class Formulas {
 	}
 
 	/**
-	 * Generates phi function for a combined fragment. For cases other than LOOP
-	 * or ALT, phiOperand is called and conjuncted with eta, mu, and gamma.
+	 * Generates phi bar formula for a combined fragment. For cases other than LOOP
+	 * or ALT, phiBarOperand is called and conjuncted with eta, mu, and gamma.
 	 * 
 	 * @param cf
-	 *            Combined fragment to generate phi function for.
-	 * @param debug
-	 *            Verbose mode.
-	 * @return
+	 *            Combined fragment to generate phi bar formula for.
+	 * @return String representing phi bar formula for the combined fragment.
 	 */
-	public static String phi(CF cf, boolean printAlpha2, boolean debug) {
+	public String phiBar(CF cf) {
 		String phi = "";
 		if (debug)
 			phi += Utils.debugPrint("Beginning Phi for cf (" + cf.num + ") (phi())");
@@ -101,15 +99,15 @@ public class Formulas {
 		default:
 			ArrayList<String> phiList = new ArrayList<String>();
 			for (Operand operand : cf.operands)
-				phiList.add(phiOperand(operand, printAlpha2, debug));
+				phiList.add(phiBarOperand(operand));
 			phi += Utils.conjunct(phiList);
-			String gamma = gamma(cf, debug);
+			String gamma = gammaBar(cf);
 			if (gamma.length() > 1)
 				phi += " & " + gamma;
-			String eta = eta(cf, debug);
+			String eta = etaBar(cf);
 			if (eta.length() > 1)
 				phi += " & " + eta;
-			String mu = mu(cf, debug);
+			String mu = muBar(cf);
 			if (mu.length() > 1)
 				phi += " & " + mu;
 		}
@@ -119,16 +117,14 @@ public class Formulas {
 	}
 
 	/**
-	 * Generates phi function for operands. Called by phi().
+	 * Generates phi bar formula for operands. Called by phi().
 	 * 
 	 * @param op
-	 *            Operand to generate phi function for. Complete phi function is
+	 *            Operand to generate phi bar formula for. Complete phi bar formula is
 	 *            a conjunction of ALL operands.
-	 * @param debug
-	 *            Verbose mode.
-	 * @return
+	 * @return String representing phi bar formula for operand.
 	 */
-	public static String phiOperand(Operand op, boolean printAlpha2, boolean debug) {
+	public String phiBarOperand(Operand op) {
 		// these strings correspond to the four portions of this formula
 
 		// phi 1
@@ -145,13 +141,13 @@ public class Formulas {
 		// end phi 1
 
 		// phi 2
-		String phi2 = theta(op, printAlpha2, debug) + " & " + op.constraint.constraint;
+		String phi2 = thetaBar(op) + " & " + op.constraint.constraint;
 		// nested CFs
 		ArrayList<String> nestedConstriants = new ArrayList<String>();
 		if (op.nestedCFs != null && op.nestedCFs.size() > 0) {
 			ArrayList<String> nestedCFConjuncts = new ArrayList<String>();
 			for (CF nestedCF : op.nestedCFs) {
-				nestedCFConjuncts.add(phi(nestedCF, printAlpha2, debug));
+				nestedCFConjuncts.add(phiBar(nestedCF));
 				// (this is for phi 4)
 				for (Operand nestedOp : nestedCF.operands)
 					nestedConstriants.add(nestedOp.constraint.constraint);
@@ -179,17 +175,15 @@ public class Formulas {
 	}
 
 	/**
-	 * Generate theta function for operand. This function calls alphaBar() for
+	 * Generate theta bar formula for operand. This formula calls alphaBar() for
 	 * all EUs in the operand (and thus all lifelines in the operand) and calls
 	 * betaBar() for all messages in the operand.
 	 * 
 	 * @param op
-	 *            Operand to generate theta function for.
-	 * @param debug
-	 *            Verbose mode.
-	 * @return
+	 *            Operand to generate theta formula for.
+	 * @return String representing theta formula for operand.
 	 */
-	public static String theta(Operand op, boolean printAlpha2, boolean debug) {
+	public String thetaBar(Operand op) {
 		String theta = "";
 		if (debug)
 			theta += Utils.debugPrint("Beginning Theta (theta())");
@@ -198,10 +192,10 @@ public class Formulas {
 		for (EU eu : op.eus) {
 			// TODO directedCEUs may need to be incorporated
 			if (eu.directedOSes != null && eu.directedOSes.size() > 0)
-				thetaConjuncts.add(alphaBar(eu, printAlpha2, debug));
+				thetaConjuncts.add(alphaBar(eu));
 			for (OS os : eu.directedOSes) {
 				if (os.osType.equals(OSType.SEND))
-					thetaConjuncts.add(betaBar(os, debug));
+					thetaConjuncts.add(betaBar(os));
 			}
 		}
 		theta += Utils.conjunct(thetaConjuncts);
@@ -211,31 +205,41 @@ public class Formulas {
 		return theta;
 	}
 
-	public static String gamma(CF cf, boolean debug) {
-		return "GAMMA GOES HERE";
+	public String gammaBar(CF cf) {
+		return "GAMMA BAR GOES HERE";
 	}
 
-	public static String eta(CF cf, boolean debug) {
-		return "ETA GOES HERE";
+	public String etaBar(CF cf) {
+		return "ETA BAR GOES HERE";
 	}
 
-	public static String mu(CF cf, boolean debug) {
-		return "MU GOES HERE";
+	public String muBar(CF cf) {
+		return "MU BAR GOES HERE";
 	}
 
-	public static String alphaBar(EU eu, boolean printAlpha2, boolean debug) {
+	/**
+	 * Generates alpha bar formula for an EU. Second half of alpha bar formula can be
+	 * dropped if printAlpha2 is set to false. This formula only applies to OSes
+	 * inside of combined fragments.
+	 * 
+	 * @param eu
+	 *            EU to generate alpha bar formula for.
+	 * @return String representing alpha bar formula for EU.
+	 */
+	public String alphaBar(EU eu) {
 		String alpha = "";
 		if (debug)
 			alpha += Utils.debugPrint("Beginning Alpha bar (alphaBar())");
 
 		// First part of alpha
 		ArrayList<String> alpha1 = new ArrayList<String>();
-		
+
 		for (int i = 0; i < eu.ordereds.size() - 1; i++) {
 			if (eu.ordereds.get(i) instanceof OS && eu.ordereds.get(i + 1) instanceof OS) {
 				OS curOS = (OS) eu.ordereds.get(i);
 				OS nextOS = (OS) eu.ordereds.get(i + 1);
-				alpha1.add("(" + Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()) + ") | (O" + curOS.ltlString() + ")");
+				alpha1.add("(" + Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()) + ") | (O " + curOS.ltlString()
+						+ ")");
 			}
 		}
 
@@ -245,9 +249,12 @@ public class Formulas {
 			// Second part of alpha
 			ArrayList<String> alpha2 = new ArrayList<String>();
 			for (OS os : eu.directedOSes)
-				alpha2.add("(" + Utils.strongUntil("!"+os.ltlString(), "("+os.ltlString() + " & " + " X G !" + os.ltlString() + ")") + " |  (!" + os.ltlString() + " & O " + os.ltlString() + "))");
-
-			alpha += " & " + Utils.conjunct(alpha2);
+				alpha2.add("("
+						+ Utils.strongUntil("!" + os.ltlString(), "(" + os.ltlString() + " & " + " X G !" + os.ltlString() + ")")
+						+ " |  (!" + os.ltlString() + " & O " + os.ltlString() + "))");
+			if (alpha1.size() > 0)
+				alpha += " & ";
+			alpha += Utils.conjunct(alpha2);
 
 		}
 		if (debug)
@@ -256,17 +263,15 @@ public class Formulas {
 	}
 
 	/**
-	 * Generate beta bar function for a message.
+	 * Generate beta bar formula for a message.
 	 * 
 	 * @param os
 	 *            OS corresponding to message to generate beta bar for. By
 	 *            convention, this message should only be called for OSes of
 	 *            type OSType.SEND.
-	 * @param debug
-	 *            Verbose mode.
-	 * @return
+	 * @return String representing beta bar formula for a message.
 	 */
-	public static String betaBar(OS os, boolean debug) {
+	public String betaBar(OS os) {
 		String beta = "";
 		if (debug)
 			beta += Utils.debugPrint("Beginning Beta Bar for message (" + os.name + ") (betaBar())");
