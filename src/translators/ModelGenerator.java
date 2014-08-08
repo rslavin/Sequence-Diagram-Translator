@@ -84,6 +84,7 @@ public class ModelGenerator {
 	 */
 	private static String generateElseConstraint(CF cf) {
 		// TODO currently only works if there is ONE else in the ENTIRE SD
+		// TODO elses need to be renamed to be unique in the preprocessor
 		String define = "DEFINE\nelse :=";
 		for (Operand op : cf.operands)
 			if (!op.constraint.constraint.toLowerCase().equals("else"))

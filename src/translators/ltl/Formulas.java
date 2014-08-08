@@ -89,7 +89,7 @@ public class Formulas {
 	 *            Verbose mode.
 	 * @return
 	 */
-	public static String phi(CF cf, boolean debug) {
+	public static String phi(CF cf, boolean printAlpha2, boolean debug) {
 		String phi = "";
 		if (debug)
 			phi += Utils.debugPrint("Beginning Phi for cf (" + cf.num + ") (phi())");
@@ -101,7 +101,7 @@ public class Formulas {
 		default:
 			ArrayList<String> phiList = new ArrayList<String>();
 			for (Operand operand : cf.operands)
-				phiList.add(phiOperand(operand, debug));
+				phiList.add(phiOperand(operand, printAlpha2, debug));
 			phi += Utils.conjunct(phiList);
 			String gamma = gamma(cf, debug);
 			if (gamma.length() > 1)
@@ -128,7 +128,7 @@ public class Formulas {
 	 *            Verbose mode.
 	 * @return
 	 */
-	public static String phiOperand(Operand op, boolean debug) {
+	public static String phiOperand(Operand op, boolean printAlpha2, boolean debug) {
 		// these strings correspond to the four portions of this formula
 
 		// phi 1
@@ -145,13 +145,13 @@ public class Formulas {
 		// end phi 1
 
 		// phi 2
-		String phi2 = theta(op, debug) + " & " + op.constraint.constraint;
+		String phi2 = theta(op, printAlpha2, debug) + " & " + op.constraint.constraint;
 		// nested CFs
 		ArrayList<String> nestedConstriants = new ArrayList<String>();
 		if (op.nestedCFs != null && op.nestedCFs.size() > 0) {
 			ArrayList<String> nestedCFConjuncts = new ArrayList<String>();
 			for (CF nestedCF : op.nestedCFs) {
-				nestedCFConjuncts.add(phi(nestedCF, debug));
+				nestedCFConjuncts.add(phi(nestedCF, printAlpha2, debug));
 				// (this is for phi 4)
 				for (Operand nestedOp : nestedCF.operands)
 					nestedConstriants.add(nestedOp.constraint.constraint);
@@ -189,7 +189,7 @@ public class Formulas {
 	 *            Verbose mode.
 	 * @return
 	 */
-	public static String theta(Operand op, boolean debug) {
+	public static String theta(Operand op, boolean printAlpha2, boolean debug) {
 		String theta = "";
 		if (debug)
 			theta += Utils.debugPrint("Beginning Theta (theta())");
@@ -198,7 +198,7 @@ public class Formulas {
 		for (EU eu : op.eus) {
 			// TODO directedCEUs may need to be incorporated
 			if (eu.directedOSes != null && eu.directedOSes.size() > 0)
-				thetaConjuncts.add(alphaBar(eu, debug));
+				thetaConjuncts.add(alphaBar(eu, printAlpha2, debug));
 			for (OS os : eu.directedOSes) {
 				if (os.osType.equals(OSType.SEND))
 					thetaConjuncts.add(betaBar(os, debug));
@@ -223,8 +223,36 @@ public class Formulas {
 		return "MU GOES HERE";
 	}
 
-	public static String alphaBar(EU eu, boolean debug) {
-		return "ALPHA BAR GOES HERE";
+	public static String alphaBar(EU eu, boolean printAlpha2, boolean debug) {
+		String alpha = "";
+		if (debug)
+			alpha += Utils.debugPrint("Beginning Alpha bar (alphaBar())");
+
+		// First part of alpha
+		ArrayList<String> alpha1 = new ArrayList<String>();
+		
+		for (int i = 0; i < eu.ordereds.size() - 1; i++) {
+			if (eu.ordereds.get(i) instanceof OS && eu.ordereds.get(i + 1) instanceof OS) {
+				OS curOS = (OS) eu.ordereds.get(i);
+				OS nextOS = (OS) eu.ordereds.get(i + 1);
+				alpha1.add("(" + Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()) + ") | (O" + curOS.ltlString() + ")");
+			}
+		}
+
+		alpha += Utils.conjunct(alpha1);
+
+		if (printAlpha2) {
+			// Second part of alpha
+			ArrayList<String> alpha2 = new ArrayList<String>();
+			for (OS os : eu.directedOSes)
+				alpha2.add("(" + Utils.strongUntil("!"+os.ltlString(), "("+os.ltlString() + " & " + " X G !" + os.ltlString() + ")") + " |  (!" + os.ltlString() + " & O " + os.ltlString() + "))");
+
+			alpha += " & " + Utils.conjunct(alpha2);
+
+		}
+		if (debug)
+			alpha += Utils.debugPrint("Completed Alpha bar (alphaBar())");
+		return alpha;
 	}
 
 	/**
