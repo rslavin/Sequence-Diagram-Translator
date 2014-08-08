@@ -11,27 +11,28 @@ public class ModelGenerator {
 	/**
 	 * Generates VAR and DEFINE sections for a sequence diagram.
 	 * 
-	 * @param sd
-	 *            Sequence diagram to create VAR and DEFINE sections for.
+	 * @param sds
+	 *            Sequence diagrams to create VAR and DEFINE sections for.
 	 * @return
 	 */
-	public static String generateVars(SD sd) {
-		return "VAR\n" + generateOSVars(sd) + generateConstraintVars(sd);
+	public static String generateVars(ArrayList<SD> sds) {
+		return "VAR\n" + generateOSVars(sds) + generateConstraintVars(sds);
 	}
 
 	/**
 	 * Generates VAR entries for OSes. Removes duplicates.
 	 * 
-	 * @param sd
-	 *            Sequence diagram to create VAR section for.
+	 * @param sds
+	 *            Sequence diagrams to create VAR section for.
 	 * @return
 	 */
-	private static String generateOSVars(SD sd) {
+	private static String generateOSVars(ArrayList<SD> sds) {
 		List<String> osList = new ArrayList<String>();
 		String osVars = "";
-		for (Lifeline lifeline : sd.lifelines)
-			for (OS os : lifeline.oses)
-				osList.add(os.ltlString() + ": boolean;");
+		for (SD sd : sds)
+			for (Lifeline lifeline : sd.lifelines)
+				for (OS os : lifeline.oses)
+					osList.add(os.ltlString() + ": boolean;");
 		Set<String> uniques = new LinkedHashSet<String>(osList);
 		for (String var : uniques)
 			osVars += var + "\n";
@@ -44,20 +45,21 @@ public class ModelGenerator {
 	 * entire SD. If multiples exist, they will all be titled "else" and cause
 	 * an error in NuSMV.
 	 * 
-	 * @param sd
-	 *            Sequence diagram to create VAR section for.
+	 * @param sds
+	 *            Sequence diagrams to create VAR section for.
 	 * @return
 	 */
-	private static String generateConstraintVars(SD sd) {
+	private static String generateConstraintVars(ArrayList<SD> sds) {
 		String constraintString = "";
 		List<String> defines = new ArrayList<String>();
 		List<String> constraints = new ArrayList<String>();
-		for (CF cf : sd.cfs)
-			for (Operand op : cf.operands)
-				if (!op.constraint.constraint.toLowerCase().equals("else"))
-					constraints.add(op.constraint.constraint + " : boolean;");
-				else
-					defines.add(generateElseConstraint(cf));
+		for (SD sd : sds)
+			for (CF cf : sd.cfs)
+				for (Operand op : cf.operands)
+					if (!op.constraint.constraint.toLowerCase().equals("else"))
+						constraints.add(op.constraint.constraint + " : boolean;");
+					else
+						defines.add(generateElseConstraint(cf));
 		// remove duplicates and generate String
 		Set<String> uniques = new LinkedHashSet<String>(constraints);
 		for (String var : uniques)

@@ -1,6 +1,7 @@
 package drivers;
 
 import java.io.File;
+import java.util.ArrayList;
 
 import sdComponents.SD;
 import translators.*;
@@ -13,8 +14,8 @@ public class Tester {
 
 		//parseXML(true);
 		testParser();
-		generateLTL();
 		generateVars();
+		generateLTL();
 
 	}
 
@@ -43,6 +44,8 @@ public class Tester {
 	}
 	
 	private static void generateVars(){
-		System.out.println(ModelGenerator.generateVars(sequenceDiagram));
+		ArrayList<SD> sds = new ArrayList<SD>();
+		sds.add(sequenceDiagram);
+		System.out.println(ModelGenerator.generateVars(sds));
 	}
 }
