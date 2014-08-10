@@ -19,7 +19,7 @@ public class CF {
 	public List<Operand> operands;
 	public OS firstOS; // was "int firstMsgNum"
 	public List<CEU> ceus;
-	public List<OS> oses;
+	//public List<OS> oses;
 	public int num;
 	public List<Operand> iterations;
 
@@ -29,7 +29,7 @@ public class CF {
 		this.operands = operands;
 		firstOS = null;
 		ceus = new ArrayList<CEU>();
-		oses = new ArrayList<OS>();
+	//	oses = new ArrayList<OS>();
 		iterations = new ArrayList<Operand>();
 		this.num = num;
 	}
@@ -68,6 +68,17 @@ public class CF {
 				return ceu;
 		return null;
 	}
+	
+	/**
+	 * Compiles list of OSes based on operands.
+	 * @return
+	 */
+	public ArrayList<OS> getOSes(){
+		ArrayList<OS> oses = new ArrayList<OS>();
+		for(Operand op : operands)
+			oses.addAll(op.getOSes());
+		return oses;
+	}
 
 	public String toString(int tabs) {
 		String tab = "";
@@ -93,9 +104,9 @@ public class CF {
 			for (CEU element : ceus)
 				ret += tab + element.toString(tabs + 1) + "\n";
 		ret += tab + "OSes:\n";
-		if (oses != null)
-			for (OS element : oses)
-				ret += tab + "   " + element.name + "\n";
+//		if (oses != null)
+//			for (OS element : oses)
+//				ret += tab + "   " + element.name + "\n";
 		ret += "Iterations:\n";
 		if (operands != null)
 			for (Operand element : operands)

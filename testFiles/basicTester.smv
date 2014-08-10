@@ -1,0 +1,27 @@
+MODULE main
+VAR
+OS_r_requestPHI: boolean;
+OS_s_verify: boolean;
+OS_s_notifyOfRightToRevoke: boolean;
+OS_s_startTimer: boolean;
+OS_r_authorize: boolean;
+OS_s_checkTimer: boolean;
+OS_r_notExpired: boolean;
+OS_s_disclosePHI: boolean;
+OS_s_requestPHI: boolean;
+OS_r_disclosePHI: boolean;
+OS_r_verify: boolean;
+OS_r_notifyOfRightToRevoke: boolean;
+OS_s_authorize: boolean;
+OS_r_startTimer: boolean;
+OS_r_checkTimer: boolean;
+OS_s_notExpired: boolean;
+LTLSPEC((
+(!OS_s_verify U (OS_r_requestPHI & !OS_s_verify)) & (!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke)) & (!OS_s_startTimer U (OS_s_notifyOfRightToRevoke & !OS_s_startTimer)) & (!OS_r_authorize U (OS_s_startTimer & !OS_r_authorize)) & (!OS_s_checkTimer U (OS_r_authorize & !OS_s_checkTimer)) & (!OS_r_notExpired U (OS_s_checkTimer & !OS_r_notExpired)) & (!OS_s_disclosePHI U (OS_r_notExpired & !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_s_verify U (OS_s_verify & X G !OS_s_verify)) & (!OS_s_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & X G !OS_s_notifyOfRightToRevoke)) & (!OS_s_startTimer U (OS_s_startTimer & X G !OS_s_startTimer)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize)) & (!OS_s_checkTimer U (OS_s_checkTimer & X G !OS_s_checkTimer)) & (!OS_r_notExpired U (OS_r_notExpired & X G !OS_r_notExpired)) & (!OS_s_disclosePHI U (OS_s_disclosePHI & X G !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI)) & (!OS_r_disclosePHI U (OS_r_requestPHI & !OS_r_disclosePHI)) & (!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_r_disclosePHI U (OS_r_disclosePHI & X G !OS_r_disclosePHI)) & (!OS_r_notifyOfRightToRevoke U (OS_r_verify & !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_r_notifyOfRightToRevoke & !OS_s_authorize)) & (!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)) & (!OS_r_verify U (OS_r_verify & X G !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_notifyOfRightToRevoke & X G !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_s_authorize & X G !OS_s_authorize)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize)) & (!OS_r_checkTimer U (OS_r_startTimer & !OS_r_checkTimer)) & (!OS_s_notExpired U (OS_r_checkTimer & !OS_s_notExpired)) & (!OS_r_notExpired U (OS_s_notExpired & !OS_r_notExpired)) & (!OS_r_startTimer U (OS_r_startTimer & X G !OS_r_startTimer)) & (!OS_r_checkTimer U (OS_r_checkTimer & X G !OS_r_checkTimer)) & (!OS_s_notExpired U (OS_s_notExpired & X G !OS_s_notExpired)) & (!OS_r_notExpired U (OS_r_notExpired & X G !OS_r_notExpired))
+&
+(!OS_r_verify U (OS_s_verify & !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) & (!OS_r_startTimer U (OS_s_startTimer & !OS_r_startTimer)) & (!OS_r_checkTimer U (OS_s_checkTimer & !OS_r_checkTimer)) & (!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) & (!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI)) & (!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)) & (!OS_r_notExpired U (OS_s_notExpired & !OS_r_notExpired))
+->
+((!OS_s_verify U (OS_r_requestPHI & !OS_s_verify)) & (!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke)) & (!OS_r_authorize U (OS_s_notifyOfRightToRevoke & !OS_r_authorize)) & (!OS_s_disclosePHI U (OS_r_authorize & !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_s_verify U (OS_s_verify & X G !OS_s_verify)) & (!OS_s_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & X G !OS_s_notifyOfRightToRevoke)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize)) & (!OS_s_disclosePHI U (OS_s_disclosePHI & X G !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI)) & (!OS_r_disclosePHI U (OS_r_requestPHI & !OS_r_disclosePHI)) & (!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_r_disclosePHI U (OS_r_disclosePHI & X G !OS_r_disclosePHI)) & (!OS_r_notifyOfRightToRevoke U (OS_r_verify & !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_r_notifyOfRightToRevoke & !OS_s_authorize)) & (!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)) & (!OS_r_verify U (OS_r_verify & X G !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_notifyOfRightToRevoke & X G !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_s_authorize & X G !OS_s_authorize)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize))
+&
+(!OS_r_verify U (OS_s_verify & !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) & (!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) & (!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI)) & (!OS_r_authorize U (OS_s_authorize & !OS_r_authorize))
+))

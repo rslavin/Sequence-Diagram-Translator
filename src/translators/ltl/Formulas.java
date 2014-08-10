@@ -8,6 +8,7 @@ import sdComponents.*;
 public class Formulas {
 	private boolean printAlpha2;
 	private boolean debug;
+	private int exe = 1;
 
 	public Formulas(boolean printAlpha2, boolean debug) {
 		this.printAlpha2 = printAlpha2;
@@ -95,7 +96,7 @@ public class Formulas {
 		switch (cf.operator) {
 		case LOOP:
 		case ALT:
-			phi += "LOOP OR ALT";
+			phi += phiBarAlt(cf, exe);
 			break;
 		default:
 			ArrayList<String> phiList = new ArrayList<String>();
@@ -103,7 +104,8 @@ public class Formulas {
 				phiList.add(phiBarOperand(operand));
 			phi += Utils.conjunct(phiList);
 			String gamma = gammaBar(cf);
-			if (gamma.length() > 1)
+			if (gamma.length() > 1) // TODO set flags for these since debug will
+									// trip them
 				phi += " & " + gamma;
 			String eta = etaBar(cf);
 			if (eta.length() > 1)
@@ -202,20 +204,68 @@ public class Formulas {
 		theta += Utils.conjunct(thetaConjuncts);
 
 		if (debug)
-			theta += Utils.debugPrint("Completed Theta (theta())");
+			theta += Utils.debugPrint("Completed Theta Bar (thetaBar())");
 		return theta;
 	}
 
 	public String gammaBar(CF cf) {
-		return "GAMMA BAR GOES HERE";
+		String gamma = "";
+		if (debug)
+			gamma += Utils.debugPrint("Beginning Gamma Bar for CF (" + cf.num + ") (gammaBar())");
+
+		// for each ceu in cf
+		ArrayList<String> ceuConjuncts = new ArrayList<String>();
+		for (CEU ceu : cf.ceus) {
+			// for each pre os
+			ArrayList<String> preOSConjuncts = new ArrayList<String>();
+			for (Ordered preOS : ceu.preOrdereds) {
+				if (preOS instanceof OS) {
+					// for each tOS
+					ArrayList<String> tosConjuncts1 = new ArrayList<String>();
+					for (OS tOS : ceu.getOSes())
+						tosConjuncts1.add("!" + tOS.ltlString());
+					if (!tosConjuncts1.isEmpty())
+						preOSConjuncts.add("(F " + ((OS) preOS).ltlString() + " -> ("
+								+ Utils.strongUntil("(" + Utils.conjunct(tosConjuncts1) + ")", ((OS) preOS).ltlString()) + "))");
+				}
+			}
+
+			// for each os
+			ArrayList<String> tOSConjuncts2 = new ArrayList<String>();
+			for (OS tOS : ceu.getOSes()) {
+				// for each post OS
+				ArrayList<String> postOSConjuncts = new ArrayList<String>();
+				for (Ordered postOS : ceu.postOrdereds)
+					if (postOS instanceof OS)
+						postOSConjuncts.add("!" + ((OS) postOS).ltlString());
+				if (!postOSConjuncts.isEmpty())
+					tOSConjuncts2.add("(F " + tOS.ltlString() + " -> ("
+							+ Utils.strongUntil("(" + Utils.conjunct(postOSConjuncts) + ")", tOS.ltlString()) + "))");
+			}
+
+			if (!preOSConjuncts.isEmpty() && !tOSConjuncts2.isEmpty())
+				ceuConjuncts.add("\n((" + Utils.conjunct(preOSConjuncts) + ") & (" + Utils.conjunct(tOSConjuncts2) + "))\n");
+			else if (!preOSConjuncts.isEmpty() && tOSConjuncts2.isEmpty())
+				ceuConjuncts.add("\n(" + Utils.conjunct(preOSConjuncts) + ")\n");
+			else if (preOSConjuncts.isEmpty() && !tOSConjuncts2.isEmpty())
+				ceuConjuncts.add("\n(" + Utils.conjunct(tOSConjuncts2) + ")\n");
+		}
+		gamma += Utils.conjunct(ceuConjuncts);
+		if (debug)
+			gamma += Utils.debugPrint("Completed Gamma Bar for CF (" + cf.num + ") (gammaBar())");
+		return gamma;
 	}
 
 	public String etaBar(CF cf) {
+		String eta = "";
+		if (debug)
+			eta += Utils.debugPrint("Beginning eta bar for CF (" + cf.num + ") (etaBar())");
 		// for each lifeline in the cf
 		ArrayList<String> lifelineConjuncts = new ArrayList<String>();
 		for (Lifeline lifeline : cf.lifelines) {
 			ArrayList<String> preOSConjuncts = new ArrayList<String>();
-			// for each pre os for the CEU on the lifeline
+			// for each pre os for the CEU on the lifeline (there are pre and
+			// post for each ceu)
 			// if pre and post ordereds exist
 			if (cf.lifelineCEU(lifeline) != null && cf.lifelineCEU(lifeline).preOrdereds != null
 					&& cf.lifelineCEU(lifeline).postOrdereds != null && cf.lifelineCEU(lifeline).preOrdereds.size() > 0
@@ -227,20 +277,45 @@ public class Formulas {
 						// for each post OS
 						for (Ordered postOS : ceu.postOrdereds) {
 							if (postOS instanceof OS) {
-								postOSConjuncts.add("!"+((OS) postOS).ltlString());
+								postOSConjuncts.add("!" + ((OS) postOS).ltlString());
 							}
-						}// TODO is F correct?
-						preOSConjuncts.add("F " + ((OS) preOS).ltlString() + " -> (" + Utils.strongUntil("(" + Utils.conjunct(postOSConjuncts) + ")", ((OS)preOS).ltlString()) + ")" );
+						}
+						preOSConjuncts.add("F " + ((OS) preOS).ltlString() + " -> ("
+								+ Utils.strongUntil("(" + Utils.conjunct(postOSConjuncts) + ")", ((OS) preOS).ltlString()) + ")");
 					}
 				}
-				lifelineConjuncts.add("("+Utils.conjunct(preOSConjuncts) + ")");
+				lifelineConjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
 			}
 		}
-		return Utils.conjunct(lifelineConjuncts);
+		eta += Utils.conjunct(lifelineConjuncts);
+		if (debug)
+			eta += Utils.debugPrint("Completed eta bar for CF (" + cf.num + ") (etaBar())");
+		return eta;
 	}
 
+	/**
+	 * Generates mu bar formula for a combined fragment.
+	 * 
+	 * @param cf
+	 *            Combined fragment to generate mu bar formula for.
+	 * @return
+	 */
 	public String muBar(CF cf) {
-		return "MU BAR GOES HERE";
+		String mu = "";
+		if (debug)
+			mu += Utils.debugPrint("Beginning mu bar for CF (" + cf.num + ") (muBar())");
+		ArrayList<String> osConjuncts = new ArrayList<String>();
+		// for each operand and each set of OSes in that operand, generate the
+		// formula
+		for (Operand operand : cf.operands)
+			for (OS os : operand.getOSes())
+				if (!os.equals(operand.getFirstOS()) && !os.osType.equals(OSType.RECEIVE))
+					osConjuncts.add(Utils.strongUnless("!" + os.ltlString(), operand.getFirstOS().ltlString()));
+
+		mu += Utils.conjunct(osConjuncts);
+		if (debug)
+			mu += Utils.debugPrint("Completed mu bar for CF (" + cf.num + ") (muBar())");
+		return mu;
 	}
 
 	/**
@@ -307,6 +382,89 @@ public class Formulas {
 		if (debug)
 			beta += Utils.debugPrint("Completed Beta Bar for message (" + os.name + ") (betaBar())");
 		return beta;
+	}
+
+	/**
+	 * Takes exe as a parameter due to nested calls.
+	 * 
+	 * @param cf
+	 * @param exe
+	 * @return
+	 */
+	private String phiBarAlt(CF cf, int exe) {
+		String phi = "";
+		if (debug)
+			phi += Utils.debugPrint("Beginning Phi Bar Alt for CF (" + cf.num + ") (phiBarAlt())");
+		
+		// for each operand in the CF
+		ArrayList<String> operandConjuncts = new ArrayList<String>();
+		for (Operand operand : cf.operands) {
+			// add to operandConjuncts
+			operandConjuncts.add(Utils.globally(phiBarAlt1(operand, cf, exe) + " & " + phiBarAlt2(operand, cf, exe)));
+		}
+
+		phi += Utils.conjunct(operandConjuncts) + " & " + gammaBar(cf) + " & " + muBar(cf) + " & " + etaBar(cf) + " & " + nu(cf);
+		if (debug)
+			phi += Utils.debugPrint("Completed Phi Bar Alt for CF (" + cf.num + ") (phiBarAlt())");
+		return phi;
+
+	}
+
+	private String phiBarAlt1(Operand operand, CF cf, int exe) {
+		// for each operand
+		ArrayList<String> innerOpConjuncts = new ArrayList<String>();
+		for (Operand innerOp : cf.operands) {
+			// for each pre os
+			ArrayList<String> preOSConjuncts = new ArrayList<String>();
+			for (Ordered preOS : innerOp.getPreOrdereds()) {
+				if (preOS instanceof OS) {
+					preOSConjuncts.add("G (!" + ((OS) preOS).ltlString() + ")");
+				}
+			}
+			innerOpConjuncts.add(Utils.conjunct(preOSConjuncts));
+		}
+		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & exe" + exe + ") -> (" + thetaBar(operand) + " | G exe" + exe
+				+ " & G " + operand.constraint.constraint;
+
+		// nested CFs
+		ArrayList<String> nestedCFConjuncts = new ArrayList<String>();
+		for (CF nestedCF : operand.nestedCFs)
+			nestedCFConjuncts.add(phiBar(nestedCF));
+		if (!nestedCFConjuncts.isEmpty())
+			phi += " & (" + Utils.conjunct(nestedCFConjuncts) + ")";
+		phi += ")";
+		return phi;
+	}
+
+	private String phiBarAlt2(Operand operand, CF cf, int exe) {
+		// for each operand
+		ArrayList<String> innerOpConjuncts = new ArrayList<String>();
+		for (Operand innerOp : cf.operands) {
+			// for each pre os
+			ArrayList<String> preOSConjuncts = new ArrayList<String>();
+			for (Ordered preOS : innerOp.getPreOrdereds()) {
+				if (preOS instanceof OS) {
+					preOSConjuncts.add("G (!" + ((OS) preOS).ltlString() + ")");
+				}
+			}
+			innerOpConjuncts.add(Utils.conjunct(preOSConjuncts));
+		}
+		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & (!exe" + exe + ")) -> "
+				+ "(G (!exe" + exe + ") & G (!" + operand.constraint.constraint + ")";
+
+		// nested CFs
+		ArrayList<String> nestedOperands = new ArrayList<String>();
+		for (CF nestedCF : operand.nestedCFs)
+			for(Operand nestedOperand : nestedCF.operands)
+				nestedOperands.add("!" + nestedOperand.constraint.constraint);
+		if (!nestedOperands.isEmpty())
+			phi += " & G (" + Utils.conjunct(nestedOperands) + ")";
+		phi += ")";
+		return phi;
+	}
+
+	private String nu(CF cf) {
+		return "NU GOES HERE";
 	}
 
 }

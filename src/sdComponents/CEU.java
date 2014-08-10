@@ -28,7 +28,6 @@ public class CEU extends Ordered {
 	public List<CEU> parentCEUs;
 
 	public boolean hasCriticalChild;
-	public OS firstOS; // was "int firstOSLocation"
 	public int iteration;
 
 	public boolean isParentPar; // unsure
@@ -44,7 +43,6 @@ public class CEU extends Ordered {
 		coveredConstraints = new ArrayList<Constraint>();
 		parentCEUs = new ArrayList<CEU>();
 		hasCriticalChild = false;
-		firstOS = null;
 		isParentPar = false;
 		euIterations = new ArrayList<EU>();
 		connectedCEUs = new ArrayList<CEU>();
@@ -89,6 +87,20 @@ public class CEU extends Ordered {
 		return null;
 	}
 
+	/**
+	 * Generates list of all OSes in CEU
+	 * 
+	 * @return
+	 */
+	public ArrayList<OS> getOSes() {
+		// finds intersection of lifeline
+		ArrayList<OS> oses = new ArrayList<OS>();
+		for (OS os : this.cf.getOSes())
+			if (this.lifeline.oses.contains(os))
+				oses.add(os);
+		return oses;
+	}
+
 	public String toString() {
 		return this.toString(0);
 	}
@@ -104,8 +116,7 @@ public class CEU extends Ordered {
 		if (cf != null)
 			ret += tab + "Combined Fragment: " + cf.num + "\n";
 		ret += tab + "Has critical child: " + hasCriticalChild + "\n";
-		if (firstOS != null)
-			ret += tab + "First OS: " + firstOS.name + "\n";
+		// ret += tab + "First occurring OS: " + firstOSName + "\n";
 		ret += tab + "Iteration: " + iteration + "\n";
 		ret += tab + "Is parent of parent: " + isParentPar + "\n";
 		ret += tab + "EUs:\n";
@@ -126,12 +137,20 @@ public class CEU extends Ordered {
 				ret += tab + "   " + element.constraint + "\n";
 		ret += tab + "Pre OSes:\n";
 		if (preOrdereds != null)
-			for (Ordered element : preOrdereds)
-				ret += tab + "   " + element.name + "\n";
+			for (Ordered element : preOrdereds) {
+				ret += tab + "   " + element.name;
+				if (element instanceof OS)
+					ret += " - " + ((OS) element).osType;
+				ret += "\n";
+			}
 		ret += tab + "Post OSes:\n";
 		if (postOrdereds != null)
-			for (Ordered element : postOrdereds)
-				ret += tab + "   " + element.name + "\n";
+			for (Ordered element : postOrdereds) {
+				ret += tab + "   " + element.name;
+				if (element instanceof OS)
+					ret += " - " + ((OS) element).osType;
+				ret += "\n";
+			}
 		ret += tab + "Parent CEUs:\n";
 		if (parentCEUs != null)
 			for (CEU element : parentCEUs)

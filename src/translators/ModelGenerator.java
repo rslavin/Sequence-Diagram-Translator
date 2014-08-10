@@ -91,4 +91,76 @@ public class ModelGenerator {
 				define += " !" + op.constraint.constraint + " &";
 		return define.substring(0, define.length() - 2) + ";";
 	}
+
+	/**
+	 * Generates initializations for boolean variables.
+	 * 
+	 * @param sds
+	 *            Sequence Diagrams to generate initializations for.
+	 * @param init
+	 *            If true, variables willbe initialized to "TRUE". "FALSE"
+	 *            otherwise.
+	 * @return
+	 */
+	public static String initializeVars(ArrayList<SD> sds, boolean init) {
+		return "ASSIGN\n" + initializeOSVars(sds, init) + initializeConstraintVars(sds, init);
+	}
+
+	/**
+	 * Generates initializations for boolean variables based on init value.
+	 * 
+	 * @param sds
+	 *            Sequence Diagrams to generate initializations for.
+	 * @param init
+	 *            If true, variables will be initialized to "TRUE". "FALSE"
+	 *            otherwise.
+	 * @return
+	 */
+	private static String initializeOSVars(ArrayList<SD> sds, boolean init) {
+		List<String> osList = new ArrayList<String>();
+		String osVars = "";
+		String initString = "TRUE";
+		if (!init)
+			initString = "FALSE";
+		for (SD sd : sds)
+			for (Lifeline lifeline : sd.lifelines)
+				for (OS os : lifeline.oses)
+					osList.add("init(" + os.ltlString() + ") := " + initString + ";");
+		Set<String> uniques = new LinkedHashSet<String>(osList);
+		for (String var : uniques)
+			osVars += var + "\n";
+		return osVars;
+	}
+
+	/**
+	 * Generates initializations for boolean variables based on init value.
+	 * Initializes variables representing constraints.
+	 * 
+	 * @param sds
+	 *            Sequence diagrams to initialize constraints for.
+	 * @param init
+	 *            If true, variables will be initialized to "TRUE". "FALSE"
+	 *            otherwise.
+	 * @return
+	 */
+	private static String initializeConstraintVars(ArrayList<SD> sds, boolean init) {
+		String constraintString = "";
+		List<String> constraints = new ArrayList<String>();
+		String initString = "TRUE";
+		if (!init)
+			initString = "FALSE";
+		for (SD sd : sds)
+			for (CF cf : sd.cfs)
+				for (Operand op : cf.operands)
+					if (!op.constraint.constraint.toLowerCase().equals("else"))
+						constraints.add("init(" + op.constraint.constraint + ") := " + initString + ";");
+
+		// remove duplicates and generate String
+		Set<String> uniques = new LinkedHashSet<String>(constraints);
+		for (String var : uniques)
+			constraintString += var + "\n";
+
+		return constraintString;
+	}
+
 }

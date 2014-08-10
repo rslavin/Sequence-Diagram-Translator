@@ -40,6 +40,41 @@ public class Operand {
 		this.nestedCFs = new ArrayList<CF>();
 	}
 
+	/**
+	 * Generates list of OS objects belonging to the Operand.
+	 * 
+	 * @return ArrayList of OSes belonging to the Operand.
+	 */
+	public ArrayList<OS> getOSes() {
+		ArrayList<OS> oses = new ArrayList<OS>();
+		for (Lifeline lifeline : lifelines)
+			for (OS os : lifeline.oses)
+				if (msgNums.contains(os.number))
+					oses.add(os);
+		return oses;
+	}
+
+	/**
+	 * Returns the first OS in the lifeline to which the operand's constraint
+	 * belongs to.
+	 * 
+	 * @return
+	 */
+	public OS getFirstOS() {
+		// generate candidates by finding intersection of oses in Operand
+		// and oses in constraint's lifeline (EU)
+		ArrayList<OS> candidates = new ArrayList<OS>();
+		for (OS os : this.getOSes())
+			if (constraint.lifeline.oses.contains(os))
+				candidates.add(os);
+		// find earliest os in candidates based on message number
+		OS earliest = null;
+		for (OS os : candidates)
+			if (earliest == null || os.number < earliest.number)
+				earliest = os;
+		return earliest;
+	}
+
 	public String toString() {
 		return this.toString(0);
 	}
@@ -67,6 +102,30 @@ public class Operand {
 			ret += tab + "   " + element + "\n";
 
 		return ret;
+	}
+
+	/**
+	 * Generates list of preordereds for operand.
+	 * 
+	 * @return
+	 */
+	public ArrayList<Ordered> getPreOrdereds() {
+		ArrayList<Ordered> preOrdereds = new ArrayList<Ordered>();
+		for (CEU ceu : cf.ceus)
+			preOrdereds.addAll(ceu.preOrdereds);
+		return preOrdereds;
+	}
+
+	/**
+	 * Generates list of postordereds for operand.
+	 * 
+	 * @return
+	 */
+	public ArrayList<Ordered> getPostOrdereds() {
+		ArrayList<Ordered> postOrdereds = new ArrayList<Ordered>();
+		for (CEU ceu : cf.ceus)
+			postOrdereds.addAll(ceu.postOrdereds);
+		return postOrdereds;
 	}
 
 }

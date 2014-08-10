@@ -38,10 +38,11 @@ public class EU {
 		directedCEUs = new ArrayList<CEU>();
 		connectedEUs = new ArrayList<EU>();
 		coveredEULabels = new ArrayList<String>();
+		ordereds = new ArrayList<Ordered>();
+		// needed?
 		ignoreOSes = new ArrayList<OS>();
 		consideredOSes = new ArrayList<OS>();
 		allPossibleOSes = new ArrayList<OS>();
-		ordereds = new ArrayList<Ordered>();
 	}
 
 	public Constraint getConstraint() {

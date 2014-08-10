@@ -30,7 +30,7 @@ public class SD {
 	public List<OS> osesInCFs() {
 		List<OS> allOSes = new ArrayList<OS>();
 		for (CF cf : cfs) {
-			for (OS os : cf.oses) {
+			for (OS os : cf.getOSes()) {
 				allOSes.add(os);
 			}
 		}

@@ -9,25 +9,27 @@ import translators.*;
 public class Tester {
 	private static SD sequenceDiagram;
 	private static long startTime, endTime;
+	private static final boolean ALPHA2 = true;
+	private static final boolean EPSILON = true;
+	private static final boolean DEBUG = true;
 
 	public static void main(String[] args) {
 
-		//parseXML(true);
-		testParser();
-		generateVars();
-		generateLTL();
-
+		sequenceDiagram = parseXML(false);
+		//testParser();
+		System.out.println(generateSMV());
 	}
 
 	private static void testParser() {
-		parseXML(true);
+		sequenceDiagram = parseXML(true);
 		System.out.println(sequenceDiagram);
 
 		System.out.println("Time to parse: " + (endTime - startTime) + "ms");
 	}
 
-	private static void parseXML(boolean verbose) {
+	private static SD parseXML(boolean verbose) {
 		File inputFile;
+		SD sequenceDiagram;
 
 		inputFile = new File("testFiles/intermediate.xml");
 		if (verbose)
@@ -37,15 +39,24 @@ public class Tester {
 		endTime = System.currentTimeMillis();
 		if (verbose)
 			System.out.println("**Parsing complete**");
+		return sequenceDiagram;
 	}
 
-	private static void generateLTL() {
-		System.out.println(LTLGenerator.generateLTL(sequenceDiagram, true, true));
+	private static String generateLTL() {
+		return LTLGenerator.generateLTL(sequenceDiagram, ALPHA2, EPSILON, DEBUG);
 	}
 	
-	private static void generateVars(){
+	private static String generateVars(){
 		ArrayList<SD> sds = new ArrayList<SD>();
 		sds.add(sequenceDiagram);
-		System.out.println(ModelGenerator.generateVars(sds));
+		return ModelGenerator.generateVars(sds) + "\n" + ModelGenerator.initializeVars(sds, false);
+	}
+	
+	private static String ltlSpec(String string){
+		return "LTLSPEC(\n" + string + "\n)";
+	}
+	
+	private static String generateSMV(){
+		return "MODULE main\n\n" + generateVars() + "\n" + ltlSpec(generateLTL());
 	}
 }

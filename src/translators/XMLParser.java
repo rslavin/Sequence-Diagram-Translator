@@ -83,10 +83,10 @@ public class XMLParser {
 				sequenceDiagram.cfs.add(parseCF((Element) cfNodes.item(i)));
 		} else
 			System.err.println("parseSequenceDiagram(): no combined fragments found");
-		
+
 		// associate CFs with operands
-		for(CF cf : sequenceDiagram.cfs)
-			for(Operand operand : cf.operands)
+		for (CF cf : sequenceDiagram.cfs)
+			for (Operand operand : cf.operands)
 				operand.cf = cf;
 
 		// generate list of sending OSes (one OS per message)
@@ -251,9 +251,10 @@ public class XMLParser {
 					// this lifeline
 					for (OS os : innerLifeline.oses) {
 						// if so, create a receiving OS on this lifeline
-						if (os.connectedLifeline.equals(outerLifeline))
+						if (os.connectedLifeline.equals(outerLifeline) && os.osType.equals(OSType.SEND)) {
 							outerLifeline.oses.add(new OS(outerLifeline, innerLifeline, os.name, os.number, OSType.RECEIVE,
 									os.messageType));
+						}
 					}
 				}
 				// reorder OSes to integrate new receiving OSes
@@ -470,7 +471,8 @@ public class XMLParser {
 	}
 
 	/**
-	 * Generates pre and post OS information.
+	 * Generates pre and post OS information for CEUs. Each CEU should have one
+	 * pre and one post OS.
 	 * 
 	 * @param oses
 	 *            ArrayList of OSes (subclass of Ordered).
@@ -480,6 +482,7 @@ public class XMLParser {
 	 *         associated with relevant pre and post Ordereds.
 	 */
 	private static ArrayList<Ordered> buildOrdered(ArrayList<OS> oses, ArrayList<CEU> ceus) {
+		// add oses to ordered (already in order)
 		ArrayList<Ordered> ordereds = new ArrayList<Ordered>(oses);
 
 		// add ceus to ordered in order

@@ -15,13 +15,10 @@ import translators.ltl.Utils;
  * 
  */
 public class LTLGenerator {
-	private static final boolean ALPHA2 = true;
-	private static final boolean EPSILON = true;
-	private static final boolean DEBUG = true;
 	
 
-	public static String generateLTL(SD sequenceDiagram, boolean alpha2, boolean epsilon){
-		Formulas formulas = new Formulas(ALPHA2, DEBUG);
+	public static String generateLTL(SD sequenceDiagram, boolean alpha2, boolean epsilon, boolean debug){
+		Formulas formulas = new Formulas(alpha2, debug);
 		String ltl = "";
 		// for each Lifeline in sequenceDiagram, print alpha and beta
 		ArrayList<String> alpha = new ArrayList<String>();
@@ -40,7 +37,7 @@ public class LTLGenerator {
 		ltl += "\n&\n" + Utils.conjunct(phi);
 		
 		// if epsilon, print epsilon
-		if(EPSILON)
+		if(epsilon)
 			;
 		return ltl;
 	}
