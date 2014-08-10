@@ -1,5 +1,6 @@
 package translators;
 
+import java.lang.Character.Subset;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
@@ -36,7 +37,7 @@ public class ModelGenerator {
 		Set<String> uniques = new LinkedHashSet<String>(osList);
 		for (String var : uniques)
 			osVars += var + "\n";
-		return osVars;
+		return osVars.substring(0, osVars.length() - 1);
 	}
 
 	/**
@@ -62,8 +63,7 @@ public class ModelGenerator {
 						defines.add(generateElseConstraint(cf));
 		// remove duplicates and generate String
 		Set<String> uniques = new LinkedHashSet<String>(constraints);
-		for (String var : uniques)
-			constraintString += var + "\n";
+		
 
 		// remove duplicates and add to String
 		if (defines != null && defines.size() > 0) {
@@ -72,6 +72,61 @@ public class ModelGenerator {
 				constraintString += "\n" + var;
 		}
 		return constraintString;
+	}
+
+	/**
+	 * Calculates the maximum exe value for var creation and initialization
+	 * 
+	 * @param ltlSDs
+	 *            List of sequence diagrams.
+	 * @return
+	 */
+	private static int countExeVars(ArrayList<String> ltlSDs) {
+		int max = 0;
+		for (String ltl : ltlSDs)
+			for (int i = max; i < Integer.MAX_VALUE; i++)
+				if (ltl.contains("exe" + (max + 1)))
+					max++;
+				else
+					break;
+		return max;
+
+	}
+
+	/**
+	 * Generates variables declarations for exes.
+	 * 
+	 * @param ltlSDs
+	 *            List of sequence diagrams to generate variables for.
+	 * @return
+	 */
+	public static String generateExeVars(ArrayList<String> ltlSDs) {
+		int max = countExeVars(ltlSDs);
+		String vars = "";
+		for (int i = 1; i <= max; i++)
+			vars += "exe" + i + ": boolean;";
+		return vars + "\n";
+	}
+
+	/**
+	 * Genenerates instantiations for exe variables
+	 * 
+	 * @param ltlSDs
+	 *            Sequence diagrams to generate instantiations for
+	 * @param init
+	 *            List of sequence diagrams to generate variables for.
+	 * @return
+	 */
+	public static String initializeExeVars(ArrayList<String> ltlSDs, boolean init) {
+		int max = countExeVars(ltlSDs);
+		String vars = "";
+		String initString = "TRUE";
+		if (!init)
+			initString = "FALSE";
+
+		for (int i = 1; i <= max; i++)
+			vars += "init(exe" + i + ") := " + initString + ";";
+		return vars;
 	}
 
 	/**
@@ -160,7 +215,7 @@ public class ModelGenerator {
 		for (String var : uniques)
 			constraintString += var + "\n";
 
-		return constraintString;
+		return constraintString.substring(0, constraintString.length() - 1);
 	}
 
 }

@@ -127,7 +127,7 @@ public class Formulas {
 	 *            formula is a conjunction of ALL operands.
 	 * @return String representing phi bar formula for operand.
 	 */
-	public String phiBarOperand(Operand op) {
+	private String phiBarOperand(Operand op) {
 		// these strings correspond to the four portions of this formula
 
 		// phi 1
@@ -140,11 +140,11 @@ public class Formulas {
 		for (Ordered os : preOSes)
 			if (os instanceof OS)
 				phi1Conjuncts.add("(G !" + ((OS) os).ltlString() + ")");
-		String phi1 = Utils.conjunct(phi1Conjuncts) + " & " + op.constraint.constraint;
+		String phi1 = Utils.conjunct(phi1Conjuncts) + " & " + op.getConstraint();
 		// end phi 1
 
 		// phi 2
-		String phi2 = thetaBar(op) + " & " + op.constraint.constraint;
+		String phi2 = thetaBar(op) + " & " + op.getConstraint();
 		// nested CFs
 		ArrayList<String> nestedConstriants = new ArrayList<String>();
 		if (op.nestedCFs != null && op.nestedCFs.size() > 0) {
@@ -153,18 +153,18 @@ public class Formulas {
 				nestedCFConjuncts.add(phiBar(nestedCF));
 				// (this is for phi 4)
 				for (Operand nestedOp : nestedCF.operands)
-					nestedConstriants.add(nestedOp.constraint.constraint);
+					nestedConstriants.add(nestedOp.getConstraint());
 			}
 			phi2 += "& " + Utils.conjunct(nestedCFConjuncts);
 		}
 		// end phi 2
 
 		// phi 3
-		String phi3 = Utils.conjunct(phi1Conjuncts) + " & (!" + op.constraint.constraint + ")";
+		String phi3 = Utils.conjunct(phi1Conjuncts) + " & (!" + op.getConstraint() + ")";
 		// end phi 3
 
 		// phi4
-		String phi4 = "G (!" + op.constraint.constraint + ")";
+		String phi4 = "G (!" + op.getConstraint() + ")";
 		if (nestedConstriants != null && nestedConstriants.size() > 0) {
 			ArrayList<String> constraintConjuncts = new ArrayList<String>();
 			for (String constraint : nestedConstriants)
@@ -186,7 +186,7 @@ public class Formulas {
 	 *            Operand to generate theta formula for.
 	 * @return String representing theta formula for operand.
 	 */
-	public String thetaBar(Operand op) {
+	private String thetaBar(Operand op) {
 		String theta = "";
 		if (debug)
 			theta += Utils.debugPrint("Beginning Theta (theta())");
@@ -208,7 +208,7 @@ public class Formulas {
 		return theta;
 	}
 
-	public String gammaBar(CF cf) {
+	private String gammaBar(CF cf) {
 		String gamma = "";
 		if (debug)
 			gamma += Utils.debugPrint("Beginning Gamma Bar for CF (" + cf.num + ") (gammaBar())");
@@ -256,7 +256,7 @@ public class Formulas {
 		return gamma;
 	}
 
-	public String etaBar(CF cf) {
+	private String etaBar(CF cf) {
 		String eta = "";
 		if (debug)
 			eta += Utils.debugPrint("Beginning eta bar for CF (" + cf.num + ") (etaBar())");
@@ -300,7 +300,7 @@ public class Formulas {
 	 *            Combined fragment to generate mu bar formula for.
 	 * @return
 	 */
-	public String muBar(CF cf) {
+	private String muBar(CF cf) {
 		String mu = "";
 		if (debug)
 			mu += Utils.debugPrint("Beginning mu bar for CF (" + cf.num + ") (muBar())");
@@ -327,7 +327,7 @@ public class Formulas {
 	 *            EU to generate alpha bar formula for.
 	 * @return String representing alpha bar formula for EU.
 	 */
-	public String alphaBar(EU eu) {
+	private String alphaBar(EU eu) {
 		String alpha = "";
 		if (debug)
 			alpha += Utils.debugPrint("Beginning Alpha bar (alphaBar())");
@@ -372,7 +372,7 @@ public class Formulas {
 	 *            type OSType.SEND.
 	 * @return String representing beta bar formula for a message.
 	 */
-	public String betaBar(OS os) {
+	private String betaBar(OS os) {
 		String beta = "";
 		if (debug)
 			beta += Utils.debugPrint("Beginning Beta Bar for message (" + os.name + ") (betaBar())");
@@ -402,8 +402,21 @@ public class Formulas {
 			// add to operandConjuncts
 			operandConjuncts.add(Utils.globally(phiBarAlt1(operand, cf, exe) + " & " + phiBarAlt2(operand, cf, exe)));
 		}
+		String gamma = gammaBar(cf);
+		String mu = muBar(cf);
+		String eta = etaBar(cf);
+		String nu = nu(cf);
 
-		phi += Utils.conjunct(operandConjuncts) + " & " + gammaBar(cf) + " & " + muBar(cf) + " & " + etaBar(cf) + " & " + nu(cf);
+		phi += Utils.conjunct(operandConjuncts);
+		if(gamma.length() > 0)
+			phi += " & " + gamma;
+		if(mu.length() > 0)
+			phi += " & " + mu;
+		if(eta.length() > 0)
+			phi += " & " + eta;
+		if(nu.length() > 0)
+			phi += " & " + nu;
+				
 		if (debug)
 			phi += Utils.debugPrint("Completed Phi Bar Alt for CF (" + cf.num + ") (phiBarAlt())");
 		return phi;
@@ -424,7 +437,7 @@ public class Formulas {
 			innerOpConjuncts.add(Utils.conjunct(preOSConjuncts));
 		}
 		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & exe" + exe + ") -> (" + thetaBar(operand) + " | G exe" + exe
-				+ " & G " + operand.constraint.constraint;
+				+ " & G " + operand.getConstraint();
 
 		// nested CFs
 		ArrayList<String> nestedCFConjuncts = new ArrayList<String>();
@@ -450,13 +463,13 @@ public class Formulas {
 			innerOpConjuncts.add(Utils.conjunct(preOSConjuncts));
 		}
 		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & (!exe" + exe + ")) -> "
-				+ "(G (!exe" + exe + ") & G (!" + operand.constraint.constraint + ")";
+				+ "(G (!exe" + exe + ") & G (!" + operand.getConstraint() + ")";
 
 		// nested CFs
 		ArrayList<String> nestedOperands = new ArrayList<String>();
 		for (CF nestedCF : operand.nestedCFs)
 			for(Operand nestedOperand : nestedCF.operands)
-				nestedOperands.add("!" + nestedOperand.constraint.constraint);
+				nestedOperands.add("!" + nestedOperand.getConstraint());
 		if (!nestedOperands.isEmpty())
 			phi += " & G (" + Utils.conjunct(nestedOperands) + ")";
 		phi += ")";
@@ -464,7 +477,7 @@ public class Formulas {
 	}
 
 	private String nu(CF cf) {
-		return "NU GOES HERE";
+		return "";
 	}
 
 }

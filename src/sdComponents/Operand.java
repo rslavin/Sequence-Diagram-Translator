@@ -3,6 +3,8 @@ package sdComponents;
 import java.util.ArrayList;
 import java.util.List;
 
+import translators.ltl.Utils;
+
 /**
  * 
  * @author Rocky Slavin
@@ -114,6 +116,23 @@ public class Operand {
 		for (CEU ceu : cf.ceus)
 			preOrdereds.addAll(ceu.preOrdereds);
 		return preOrdereds;
+	}
+
+	/**
+	 * Returns the operand's constraint, converting else to conjunction of
+	 * negation of other constraints when necessary.
+	 * 
+	 * @return
+	 */
+	public String getConstraint() {
+		if (constraint.constraint.toLowerCase().equals("else")) {
+			ArrayList<String> otherConstraints = new ArrayList<String>();
+			for (Operand otherOp : cf.operands)
+				if (!otherOp.equals(this))
+					otherConstraints.add("!" + otherOp.constraint.constraint);
+			return "(" + Utils.conjunct(otherConstraints) + ")";
+		}
+		return constraint.constraint;
 	}
 
 	/**
