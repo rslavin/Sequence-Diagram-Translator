@@ -74,6 +74,28 @@ public class Utils {
 		}
 	}
 
+	/**
+	 * Produces String of xor'ed elements in list.
+	 * 
+	 * @param list
+	 *            ArrayList of String to xor.
+	 * @return String with elements of list connected with " xor ". Removes
+	 *         trailing " xor ".
+	 */
+	public static String xor(ArrayList<String> list) {
+		String ret = "";
+		switch (list.size()) {
+		case 0:
+			return "";
+		case 1:
+			return list.get(0);
+		default:
+			for (String element : list)
+				ret += element + " xor ";
+			return ret.substring(0, ret.length() - 5);
+		}
+	}
+
 	public static String debugPrint(String msg) {
 		return "\r\n-- DEBUG: " + msg + "\r\n";
 
