@@ -16,8 +16,9 @@ import translators.ltl.Utils;
  */
 public class LTLGenerator {
 
-	public static String generateLTL(SD sequenceDiagram, boolean alpha2, boolean epsilon, boolean debug) {
+	public static String generateLTL(SD sequenceDiagram, boolean alpha2, boolean epsilon, boolean debug, int exe) {
 		Formulas formulas = new Formulas(alpha2, debug);
+		formulas.exe = exe;
 		String ltl = "";
 		// for each Lifeline in sequenceDiagram, print alpha and beta
 		ArrayList<String> alpha = new ArrayList<String>();
@@ -38,6 +39,7 @@ public class LTLGenerator {
 		// if epsilon, print epsilon
 		if (epsilon)
 			;
+		exe = formulas.exe; // send back new exe value
 		return ltl;
 	}
 }

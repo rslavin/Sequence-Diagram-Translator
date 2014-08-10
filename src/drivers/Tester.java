@@ -17,6 +17,8 @@ public class Tester {
 	private static SD policy;
 	private static SD regulation;
 
+	private static int exe = 1;
+	
 	private static final boolean ALPHA2 = true;
 	private static final boolean EPSILON = true;
 	private static final boolean DEBUG = false;
@@ -35,10 +37,12 @@ public class Tester {
 		sequenceDiagrams.add(policy);
 		sequenceDiagrams.add(regulation);
 		
-		String policyLTL = generateLTL(policy);
-		String regulationLTL = generateLTL(regulation);
-		// add to ltlSDs for exe generation
+		String policyLTL = generateLTL(policy, exe);
 		ltlSDs.add(policyLTL);
+		// get exe value and pass it on
+//		String regulationLTL = generateLTL(regulation, ModelGenerator.countExeVars((ArrayList<String>)ltlSDs) + 1);
+		String regulationLTL = generateLTL(regulation, exe);
+		// add to ltlSDs for exe generation
 		ltlSDs.add(regulationLTL);
 		
 		return "MODULE main\n" + generateVars() + "\n\n" + ltlSpec("(" + policyLTL + ") \n\n-> \n\n(" + regulationLTL + ")");
@@ -63,8 +67,8 @@ public class Tester {
 		return sequenceDiagram;
 	}
 
-	private static String generateLTL(SD sd) {
-		return LTLGenerator.generateLTL(sd, ALPHA2, EPSILON, DEBUG);
+	private static String generateLTL(SD sd, int exe) {
+		return LTLGenerator.generateLTL(sd, ALPHA2, EPSILON, DEBUG, exe);
 	}
 
 	private static String generateVars() {
@@ -78,7 +82,7 @@ public class Tester {
 	}
 
 	public static String generateSMV(SD sd) {
-		String ltl = generateLTL(sd);
+		String ltl = generateLTL(sd, exe);
 		ltlSDs.add(ltl);
 		return "MODULE main\n\n" + generateVars() + "\n" + ltlSpec(ltl);
 	}

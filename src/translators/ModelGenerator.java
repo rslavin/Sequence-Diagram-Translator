@@ -81,7 +81,7 @@ public class ModelGenerator {
 	 *            List of sequence diagrams.
 	 * @return
 	 */
-	private static int countExeVars(ArrayList<String> ltlSDs) {
+	public static int countExeVars(ArrayList<String> ltlSDs) {
 		int max = 0;
 		for (String ltl : ltlSDs)
 			for (int i = max; i < Integer.MAX_VALUE; i++)
@@ -104,7 +104,7 @@ public class ModelGenerator {
 		int max = countExeVars(ltlSDs);
 		String vars = "";
 		for (int i = 1; i <= max; i++)
-			vars += "exe" + i + ": boolean;";
+			vars += "exe" + i + ": boolean;\n";
 		return vars + "\n";
 	}
 
@@ -125,7 +125,7 @@ public class ModelGenerator {
 			initString = "FALSE";
 
 		for (int i = 1; i <= max; i++)
-			vars += "init(exe" + i + ") := " + initString + ";";
+			vars += "init(exe" + i + ") := " + initString + ";\n";
 		return vars;
 	}
 

@@ -8,7 +8,8 @@ import sdComponents.*;
 public class Formulas {
 	private boolean printAlpha2;
 	private boolean debug;
-	private int exe = 1;
+	public int exe; // represents exe value, this must be changed for successive
+					// SDs
 
 	public Formulas(boolean printAlpha2, boolean debug) {
 		this.printAlpha2 = printAlpha2;
@@ -28,7 +29,6 @@ public class Formulas {
 		String alpha = "";
 		if (debug)
 			alpha += Utils.debugPrint("Beginning Alpha for lifeline (" + lifeline.name + ") (alpha())");
-
 		// First part of alpha
 		ArrayList<String> alpha1 = new ArrayList<String>();
 		for (int i = 0; i < lifeline.orderedElements.size() - 1; i++) {
@@ -395,28 +395,28 @@ public class Formulas {
 		String phi = "";
 		if (debug)
 			phi += Utils.debugPrint("Beginning Phi Bar Alt for CF (" + cf.num + ") (phiBarAlt())");
-		
+
 		// for each operand in the CF
 		ArrayList<String> operandConjuncts = new ArrayList<String>();
 		for (Operand operand : cf.operands) {
 			// add to operandConjuncts
-			operandConjuncts.add(Utils.globally(phiBarAlt1(operand, cf, exe) + " & " + phiBarAlt2(operand, cf, exe)));
+			operandConjuncts.add(Utils.globally(phiBarAlt1(operand, cf, exe) + " & " + phiBarAlt2(operand, cf, exe++)));
 		}
 		String gamma = gammaBar(cf);
 		String mu = muBar(cf);
 		String eta = etaBar(cf);
-		String nu = nu(cf);
+		String nu = nu(cf, exe);
 
 		phi += Utils.conjunct(operandConjuncts);
-		if(gamma.length() > 0)
+		if (gamma.length() > 0)
 			phi += " & " + gamma;
-		if(mu.length() > 0)
+		if (mu.length() > 0)
 			phi += " & " + mu;
-		if(eta.length() > 0)
+		if (eta.length() > 0)
 			phi += " & " + eta;
-		if(nu.length() > 0)
+		if (nu.length() > 0)
 			phi += " & " + nu;
-				
+
 		if (debug)
 			phi += Utils.debugPrint("Completed Phi Bar Alt for CF (" + cf.num + ") (phiBarAlt())");
 		return phi;
@@ -451,7 +451,7 @@ public class Formulas {
 
 	private String phiBarAlt2(Operand operand, CF cf, int exe) {
 		// for each operand
-		ArrayList<String> innerOpConjuncts = new ArrayList<String>();
+		ArrayList<String> innerOpDisjuncts = new ArrayList<String>();
 		for (Operand innerOp : cf.operands) {
 			// for each pre os
 			ArrayList<String> preOSConjuncts = new ArrayList<String>();
@@ -460,15 +460,15 @@ public class Formulas {
 					preOSConjuncts.add("G (!" + ((OS) preOS).ltlString() + ")");
 				}
 			}
-			innerOpConjuncts.add(Utils.conjunct(preOSConjuncts));
+			innerOpDisjuncts.add(Utils.conjunct(preOSConjuncts));
 		}
-		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & (!exe" + exe + ")) -> "
-				+ "(G (!exe" + exe + ") & G (!" + operand.getConstraint() + ")";
+		String phi = "(" + Utils.disjunct(innerOpDisjuncts) + " & (!exe" + exe + ")) -> " + "(G (!exe" + exe + ") & G (!"
+				+ operand.getConstraint() + ")";
 
 		// nested CFs
 		ArrayList<String> nestedOperands = new ArrayList<String>();
 		for (CF nestedCF : operand.nestedCFs)
-			for(Operand nestedOperand : nestedCF.operands)
+			for (Operand nestedOperand : nestedCF.operands)
 				nestedOperands.add("!" + nestedOperand.getConstraint());
 		if (!nestedOperands.isEmpty())
 			phi += " & G (" + Utils.conjunct(nestedOperands) + ")";
@@ -476,8 +476,29 @@ public class Formulas {
 		return phi;
 	}
 
-	private String nu(CF cf) {
-		return "";
-	}
+	private String nu(CF cf, int exe) {
+		String nu = "";
+		if (debug)
+			nu += Utils.debugPrint("Beginning Nu for CF (" + cf.num + ") (nu())");
+		// for each operand
+		ArrayList<String> xorOps = new ArrayList<String>();
+		ArrayList<String> opConjuncts = new ArrayList<String>();
+		ArrayList<String> negOpConjuncts = new ArrayList<String>();
+		ArrayList<String> osConjuncts = new ArrayList<String>();
+		for (Operand op : cf.operands) {
+			xorOps.add("exe" + exe);
+			opConjuncts.add("(exe" + exe + " -> " + op.getConstraint() + ")");
+			negOpConjuncts.add("(!" + op.getConstraint() + ")");
+			for (OS os : op.getOSes()) {
+				osConjuncts.add("(" + os.ltlString() + " -> exe" + exe + ")");
+			}
+		}
+		exe++;
 
+		nu += Utils.globally("(((" + Utils.xor(xorOps) + ") & (" + Utils.conjunct(opConjuncts) + ")) | ("
+				+ Utils.conjunct(negOpConjuncts) + ")) & (" + Utils.conjunct(osConjuncts) + ")");
+		if (debug)
+			nu += Utils.debugPrint("Beginning Nu for CF (" + cf.num + ") (nu())");
+		return nu;
+	}
 }
