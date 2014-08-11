@@ -27,6 +27,7 @@ import enums.*;
 public class XMLParser {
 	private static SD sequenceDiagram;
 	private static int cfNum = 1;
+	public static int opNum = 1;
 
 	/**
 	 * Parses file into dom and normalizes, then calls parseSequenceDiagram() to
@@ -225,7 +226,7 @@ public class XMLParser {
 		Element xmlConstraint = (Element) xmlElement.getElementsByTagName("condition").item(0);
 		Constraint constraint = new Constraint(elementValue(xmlConstraint, "name"), sequenceDiagram.getLifeline(elementValue(
 				xmlConstraint, "lifeline")));
-		Operand op = new Operand(constraint);
+		Operand op = new Operand(constraint, opNum++);
 		op.lifelines = new ArrayList<Lifeline>(lifelines);
 		op.msgNums = msgNums;
 		op.nestedCFs = combinedFragments;

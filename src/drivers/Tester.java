@@ -1,6 +1,9 @@
 package drivers;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -9,45 +12,48 @@ import translators.*;
 
 public class Tester {
 	private static long startTime, endTime;
-	private static String sdLTL;
 
 	private static List<SD> sequenceDiagrams;
-	private static List<String> ltlSDs;
 
 	private static SD policy;
 	private static SD regulation;
 
-	private static int exe = 1;
-	
 	private static final boolean ALPHA2 = true;
 	private static final boolean EPSILON = true;
 	private static final boolean DEBUG = false;
 
 	public static void main(String[] args) {
-		sequenceDiagrams = new ArrayList<SD>();
-		ltlSDs = new ArrayList<String>();
-//		sequenceDiagrams.add(parseXML("testFiles/intermediate.xml", false));
-//		generateSMV(sequenceDiagrams.get(0));
-		System.out.println(conformance("testFiles/tester.xml", "testFiles/hipaa.xml", false));
+		// sequenceDiagrams.add(parseXML("testFiles/intermediate.xml", false));
+		// generateSMV(sequenceDiagrams.get(0));
+		System.out.println(conformance("testFiles/tester.xml", "testFiles/hipaa.xml"));
 	}
 
-	public static String conformance(String policyFile, String regulationFile, boolean verbose){
-		policy = parseXML(policyFile, verbose);
-		regulation = parseXML(regulationFile, verbose);
+	public static String conformance(String policyFile, String regulationFile) {
+		sequenceDiagrams = new ArrayList<SD>();
+		policy = parseXML(policyFile, false);
+		regulation = parseXML(regulationFile, false);
 		sequenceDiagrams.add(policy);
 		sequenceDiagrams.add(regulation);
-		
-		String policyLTL = generateLTL(policy, exe);
-		ltlSDs.add(policyLTL);
-		// get exe value and pass it on
-//		String regulationLTL = generateLTL(regulation, ModelGenerator.countExeVars((ArrayList<String>)ltlSDs) + 1);
-		String regulationLTL = generateLTL(regulation, exe);
-		// add to ltlSDs for exe generation
-		ltlSDs.add(regulationLTL);
-		
-		return "MODULE main\n" + generateVars() + "\n\n" + ltlSpec("(" + policyLTL + ") \n\n-> \n\n(" + regulationLTL + ")");
+
+		String policyLTL = generateLTL(policy);
+		String regulationLTL = generateLTL(regulation);
+
+		return "MODULE main\n" + generateVars() + "\n\n" + ltlSpec("(" + policyLTL + ") \n\n->\n\n(" + regulationLTL + ")");
 	}
 
+	public static void conformanceToFile(String policyFile, String regulationFile) {
+		try {
+			PrintWriter writer = new PrintWriter("conformance.smv", "UTF-8");
+			writer.println(conformance(policyFile, regulationFile));
+			writer.close();
+		} catch (FileNotFoundException e) {
+			e.printStackTrace();
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+	}
+
+	@SuppressWarnings("unused")
 	private static void printTime() {
 		System.out.println("Time to parse: " + (endTime - startTime) + "ms");
 	}
@@ -67,14 +73,13 @@ public class Tester {
 		return sequenceDiagram;
 	}
 
-	private static String generateLTL(SD sd, int exe) {
-		return LTLGenerator.generateLTL(sd, ALPHA2, EPSILON, DEBUG, exe);
+	private static String generateLTL(SD sd) {
+		return LTLGenerator.generateLTL(sd, ALPHA2, EPSILON, DEBUG);
 	}
 
 	private static String generateVars() {
-		return ModelGenerator.generateVars((ArrayList<SD>) sequenceDiagrams) + "\n" + ModelGenerator.generateExeVars((ArrayList<String>)ltlSDs)
-				+ "\n" +ModelGenerator.initializeVars((ArrayList<SD>) sequenceDiagrams, false) + "\n"
-				+ ModelGenerator.initializeExeVars((ArrayList<String>) ltlSDs, false);
+		return ModelGenerator.generateVars((ArrayList<SD>) sequenceDiagrams) + "\n\n"
+				+ ModelGenerator.initializeVars((ArrayList<SD>) sequenceDiagrams, false);
 	}
 
 	private static String ltlSpec(String string) {
@@ -82,8 +87,7 @@ public class Tester {
 	}
 
 	public static String generateSMV(SD sd) {
-		String ltl = generateLTL(sd, exe);
-		ltlSDs.add(ltl);
+		String ltl = generateLTL(sd);
 		return "MODULE main\n\n" + generateVars() + "\n" + ltlSpec(ltl);
 	}
 

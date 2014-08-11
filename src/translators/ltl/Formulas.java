@@ -8,8 +8,6 @@ import sdComponents.*;
 public class Formulas {
 	private boolean printAlpha2;
 	private boolean debug;
-	public int exe; // represents exe value, this must be changed for successive
-					// SDs
 
 	public Formulas(boolean printAlpha2, boolean debug) {
 		this.printAlpha2 = printAlpha2;
@@ -96,7 +94,7 @@ public class Formulas {
 		switch (cf.operator) {
 		case LOOP:
 		case ALT:
-			phi += phiBarAlt(cf, exe);
+			phi += phiBarAlt(cf);
 			break;
 		default:
 			ArrayList<String> phiList = new ArrayList<String>();
@@ -391,7 +389,7 @@ public class Formulas {
 	 * @param exe
 	 * @return
 	 */
-	private String phiBarAlt(CF cf, int exe) {
+	private String phiBarAlt(CF cf) {
 		String phi = "";
 		if (debug)
 			phi += Utils.debugPrint("Beginning Phi Bar Alt for CF (" + cf.num + ") (phiBarAlt())");
@@ -400,12 +398,12 @@ public class Formulas {
 		ArrayList<String> operandConjuncts = new ArrayList<String>();
 		for (Operand operand : cf.operands) {
 			// add to operandConjuncts
-			operandConjuncts.add(Utils.globally(phiBarAlt1(operand, cf, exe) + " & " + phiBarAlt2(operand, cf, exe++)));
+			operandConjuncts.add(Utils.globally(phiBarAlt1(operand, cf) + " & " + phiBarAlt2(operand, cf)));
 		}
 		String gamma = gammaBar(cf);
 		String mu = muBar(cf);
 		String eta = etaBar(cf);
-		String nu = nu(cf, exe);
+		String nu = nu(cf);
 
 		phi += Utils.conjunct(operandConjuncts);
 		if (gamma.length() > 0)
@@ -423,7 +421,8 @@ public class Formulas {
 
 	}
 
-	private String phiBarAlt1(Operand operand, CF cf, int exe) {
+	// TODO store exe values directly in Operands when parsing. Ask Hui.
+	private String phiBarAlt1(Operand operand, CF cf) {
 		// for each operand
 		ArrayList<String> innerOpConjuncts = new ArrayList<String>();
 		for (Operand innerOp : cf.operands) {
@@ -436,7 +435,7 @@ public class Formulas {
 			}
 			innerOpConjuncts.add(Utils.conjunct(preOSConjuncts));
 		}
-		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & exe" + exe + ") -> (" + thetaBar(operand) + " | G exe" + exe
+		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & exe" + operand.exeNum + ") -> (" + thetaBar(operand) + " | G exe" + operand.exeNum
 				+ " & G " + operand.getConstraint();
 
 		// nested CFs
@@ -449,7 +448,7 @@ public class Formulas {
 		return phi;
 	}
 
-	private String phiBarAlt2(Operand operand, CF cf, int exe) {
+	private String phiBarAlt2(Operand operand, CF cf) {
 		// for each operand
 		ArrayList<String> innerOpDisjuncts = new ArrayList<String>();
 		for (Operand innerOp : cf.operands) {
@@ -462,7 +461,7 @@ public class Formulas {
 			}
 			innerOpDisjuncts.add(Utils.conjunct(preOSConjuncts));
 		}
-		String phi = "(" + Utils.disjunct(innerOpDisjuncts) + " & (!exe" + exe + ")) -> " + "(G (!exe" + exe + ") & G (!"
+		String phi = "(" + Utils.disjunct(innerOpDisjuncts) + " & (!exe" + operand.exeNum + ")) -> " + "(G (!exe" + operand.exeNum + ") & G (!"
 				+ operand.getConstraint() + ")";
 
 		// nested CFs
@@ -476,7 +475,7 @@ public class Formulas {
 		return phi;
 	}
 
-	private String nu(CF cf, int exe) {
+	private String nu(CF cf) {
 		String nu = "";
 		if (debug)
 			nu += Utils.debugPrint("Beginning Nu for CF (" + cf.num + ") (nu())");
@@ -486,14 +485,13 @@ public class Formulas {
 		ArrayList<String> negOpConjuncts = new ArrayList<String>();
 		ArrayList<String> osConjuncts = new ArrayList<String>();
 		for (Operand op : cf.operands) {
-			xorOps.add("exe" + exe);
-			opConjuncts.add("(exe" + exe + " -> " + op.getConstraint() + ")");
+			xorOps.add("exe" + op.exeNum);
+			opConjuncts.add("(exe" + op.exeNum + " -> " + op.getConstraint() + ")");
 			negOpConjuncts.add("(!" + op.getConstraint() + ")");
 			for (OS os : op.getOSes()) {
-				osConjuncts.add("(" + os.ltlString() + " -> exe" + exe + ")");
+				osConjuncts.add("(" + os.ltlString() + " -> exe" + op.exeNum + ")");
 			}
 		}
-		exe++;
 
 		nu += Utils.globally("(((" + Utils.xor(xorOps) + ") & (" + Utils.conjunct(opConjuncts) + ")) | ("
 				+ Utils.conjunct(negOpConjuncts) + ")) & (" + Utils.conjunct(osConjuncts) + ")");

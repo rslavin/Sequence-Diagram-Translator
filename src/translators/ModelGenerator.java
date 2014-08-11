@@ -1,11 +1,11 @@
 package translators;
 
-import java.lang.Character.Subset;
 import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
 
+import enums.Operator;
 import sdComponents.*;
 
 public class ModelGenerator {
@@ -17,7 +17,21 @@ public class ModelGenerator {
 	 * @return
 	 */
 	public static String generateVars(ArrayList<SD> sds) {
-		return "VAR\n" + generateOSVars(sds) + generateConstraintVars(sds);
+		return "VAR\n" + generateOSVars(sds) + generateExeVars(sds) + generateConstraintVars(sds);
+	}
+
+	/**
+	 * Generates initializations for boolean variables.
+	 * 
+	 * @param sds
+	 *            Sequence Diagrams to generate initializations for.
+	 * @param init
+	 *            If true, variables willbe initialized to "TRUE". "FALSE"
+	 *            otherwise.
+	 * @return
+	 */
+	public static String initializeVars(ArrayList<SD> sds, boolean init) {
+		return "ASSIGN\n" + initializeOSVars(sds, init) + initializeExeVars(sds, init) + initializeConstraintVars(sds, init);
 	}
 
 	/**
@@ -37,14 +51,14 @@ public class ModelGenerator {
 		Set<String> uniques = new LinkedHashSet<String>(osList);
 		for (String var : uniques)
 			osVars += var + "\n";
-		return osVars.substring(0, osVars.length() - 1);
+		return osVars;
 	}
 
 	/**
-	 * Generates VAR entries for constraints. Removes duplicates. Attempts to
-	 * handle "else" constraints. Currently only works if one "else" exists in
-	 * entire SD. If multiples exist, they will all be titled "else" and cause
-	 * an error in NuSMV.
+	 * Generates VAR entries for constraints. Removes duplicates. "else"
+	 * constraints are skipped here and handled in the ltl formula by replacing
+	 * the constraint with the negation of the conjunction of other constraints
+	 * in the combined fragment.
 	 * 
 	 * @param sds
 	 *            Sequence diagrams to create VAR section for.
@@ -59,38 +73,18 @@ public class ModelGenerator {
 				for (Operand op : cf.operands)
 					if (!op.constraint.constraint.toLowerCase().equals("else"))
 						constraints.add(op.constraint.constraint + " : boolean;");
-					else
-						defines.add(generateElseConstraint(cf));
+		// ELSE is converted in the formula. Macros are not needed.
 		// remove duplicates and generate String
 		Set<String> uniques = new LinkedHashSet<String>(constraints);
-		
 
 		// remove duplicates and add to String
 		if (defines != null && defines.size() > 0) {
+			constraintString += "DEFINE";
 			uniques = new LinkedHashSet<String>(constraints);
 			for (String var : uniques)
 				constraintString += "\n" + var;
 		}
 		return constraintString;
-	}
-
-	/**
-	 * Calculates the maximum exe value for var creation and initialization
-	 * 
-	 * @param ltlSDs
-	 *            List of sequence diagrams.
-	 * @return
-	 */
-	public static int countExeVars(ArrayList<String> ltlSDs) {
-		int max = 0;
-		for (String ltl : ltlSDs)
-			for (int i = max; i < Integer.MAX_VALUE; i++)
-				if (ltl.contains("exe" + (max + 1)))
-					max++;
-				else
-					break;
-		return max;
-
 	}
 
 	/**
@@ -100,12 +94,16 @@ public class ModelGenerator {
 	 *            List of sequence diagrams to generate variables for.
 	 * @return
 	 */
-	public static String generateExeVars(ArrayList<String> ltlSDs) {
-		int max = countExeVars(ltlSDs);
-		String vars = "";
-		for (int i = 1; i <= max; i++)
-			vars += "exe" + i + ": boolean;\n";
-		return vars + "\n";
+	private static String generateExeVars(ArrayList<SD> sds) {
+		String exeVars = "";
+		for (SD sd : sds)
+			for (CF cf : sd.cfs)
+				for (Operand op : cf.operands)
+					if (op.cf.operator.equals(Operator.ALT))
+						exeVars += "exe" + op.exeNum + ": boolean;\n";
+		if (exeVars.length() > 0)
+			return exeVars.substring(0, exeVars.length() - 1);
+		return exeVars;
 	}
 
 	/**
@@ -117,48 +115,18 @@ public class ModelGenerator {
 	 *            List of sequence diagrams to generate variables for.
 	 * @return
 	 */
-	public static String initializeExeVars(ArrayList<String> ltlSDs, boolean init) {
-		int max = countExeVars(ltlSDs);
-		String vars = "";
+	private static String initializeExeVars(ArrayList<SD> sds, boolean init) {
+		String exeVars = "";
 		String initString = "TRUE";
 		if (!init)
 			initString = "FALSE";
+		for (SD sd : sds)
+			for (CF cf : sd.cfs)
+				for (Operand op : cf.operands)
+					if (op.cf.operator.equals(Operator.ALT))
+						exeVars += "init(exe" + op.exeNum + ") := " + initString + ";\n";
 
-		for (int i = 1; i <= max; i++)
-			vars += "init(exe" + i + ") := " + initString + ";\n";
-		return vars;
-	}
-
-	/**
-	 * Generates the "else" macro. Triggered by generateConstrainVars() when a
-	 * constraint equals "else".
-	 * 
-	 * @param cf
-	 *            Combined fragment with "else" constraint.
-	 * @return
-	 */
-	private static String generateElseConstraint(CF cf) {
-		// TODO currently only works if there is ONE else in the ENTIRE SD
-		// TODO elses need to be renamed to be unique in the preprocessor
-		String define = "DEFINE\nelse :=";
-		for (Operand op : cf.operands)
-			if (!op.constraint.constraint.toLowerCase().equals("else"))
-				define += " !" + op.constraint.constraint + " &";
-		return define.substring(0, define.length() - 2) + ";";
-	}
-
-	/**
-	 * Generates initializations for boolean variables.
-	 * 
-	 * @param sds
-	 *            Sequence Diagrams to generate initializations for.
-	 * @param init
-	 *            If true, variables willbe initialized to "TRUE". "FALSE"
-	 *            otherwise.
-	 * @return
-	 */
-	public static String initializeVars(ArrayList<SD> sds, boolean init) {
-		return "ASSIGN\n" + initializeOSVars(sds, init) + initializeConstraintVars(sds, init);
+		return exeVars;
 	}
 
 	/**

@@ -21,17 +21,19 @@ public class Operand {
 	public List<Lifeline> lifelines;
 	public List<EU> eus;
 	public List<Integer> msgNums;
+	public int exeNum;
 
-	public Operand(Constraint constraint) {
+	public Operand(Constraint constraint, int exeNum) {
 		this.constraint = constraint;
 		this.cf = null;
 		this.lifelines = new ArrayList<Lifeline>();
 		this.eus = new ArrayList<EU>();
 		this.msgNums = new ArrayList<Integer>();
 		this.nestedCFs = new ArrayList<CF>();
+		this.exeNum = exeNum;
 	}
 
-	public Operand(Constraint constraint, List<Lifeline> lifelines, List<Integer> msgNums) {
+	public Operand(Constraint constraint, List<Lifeline> lifelines, List<Integer> msgNums, int exeNum) {
 		this.constraint = constraint;
 		this.lifelines = lifelines;
 		this.msgNums = msgNums;
@@ -40,6 +42,7 @@ public class Operand {
 		this.eus = new ArrayList<EU>();
 		this.msgNums = new ArrayList<Integer>();
 		this.nestedCFs = new ArrayList<CF>();
+		this.exeNum = exeNum;
 	}
 
 	/**
@@ -87,7 +90,8 @@ public class Operand {
 			tab += "   ";
 
 		String ret = "   >>OPERAND<<\n";
-		ret += tab + "Constraint: " + constraint.constraint + "\n";
+		ret += tab + "Constraint: " + this.getConstraint() + "\n";
+		ret += tab + "Exe number: " + exeNum + "\n";
 		if (cf != null)
 			ret += tab + "Combined Fragment: " + cf.num + "\n";
 		ret += tab + "Nested combined fragments:\n";
