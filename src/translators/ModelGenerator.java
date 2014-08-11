@@ -66,7 +66,6 @@ public class ModelGenerator {
 	 */
 	private static String generateConstraintVars(ArrayList<SD> sds) {
 		String constraintString = "";
-		List<String> defines = new ArrayList<String>();
 		List<String> constraints = new ArrayList<String>();
 		for (SD sd : sds)
 			for (CF cf : sd.cfs)
@@ -77,13 +76,8 @@ public class ModelGenerator {
 		// remove duplicates and generate String
 		Set<String> uniques = new LinkedHashSet<String>(constraints);
 
-		// remove duplicates and add to String
-		if (defines != null && defines.size() > 0) {
-			constraintString += "DEFINE";
-			uniques = new LinkedHashSet<String>(constraints);
-			for (String var : uniques)
-				constraintString += "\n" + var;
-		}
+		for (String var : uniques)
+			constraintString += "\n" + var;
 		return constraintString;
 	}
 
