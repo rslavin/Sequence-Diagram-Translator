@@ -1,0 +1,96 @@
+---- OPERAND 1
+-- DEBUG: Beginning Phi for cf (1) (phi())
+G ((((G !OS_s_verify) & (G !OS_r_verify) & true) -> (
+
+
+------- DEBUG: Beginning Theta (theta())
+
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_r_authorize U (OS_s_startTimer & !OS_r_authorize))) | (O OS_s_startTimer) & ((!OS_s_startTimer U ((OS_s_startTimer &  X G !OS_s_startTimer) & !OS_s_startTimer)) |  (!OS_s_startTimer & O OS_s_startTimer)) & ((!OS_r_authorize U ((OS_r_authorize &  X G !OS_r_authorize) & !OS_r_authorize)) |  (!OS_r_authorize & O OS_r_authorize))
+-- DEBUG: Completed Alpha bar (alphaBar())
+ & 
+-- DEBUG: Beginning Beta Bar for message (startTimer) (betaBar())
+(!OS_r_startTimer U (OS_s_startTimer & !OS_r_startTimer)) | (O OS_s_startTimer)
+-- DEBUG: Completed Beta Bar for message (startTimer) (betaBar())
+ & 
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_s_authorize U ((OS_s_authorize &  X G !OS_s_authorize) & !OS_s_authorize)) |  (!OS_s_authorize & O OS_s_authorize))
+-- DEBUG: Completed Alpha bar (alphaBar())
+ & 
+-- DEBUG: Beginning Beta Bar for message (authorize) (betaBar())
+(!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)) | (O OS_s_authorize)
+-- DEBUG: Completed Beta Bar for message (authorize) (betaBar())
+ & 
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_r_startTimer U ((OS_r_startTimer &  X G !OS_r_startTimer) & !OS_r_startTimer)) |  (!OS_r_startTimer & O OS_r_startTimer))
+-- DEBUG: Completed Alpha bar (alphaBar())
+
+------- DEBUG: Completed Theta Bar (thetaBar())
+
+
+ & true)) & (((G !OS_s_verify) & (G !OS_r_verify) & (!true)) -> (G (!true)))) 
+
+------ OPERAND 2
+& G ((((G !OS_s_verify) & (G !OS_r_verify) & true) -> (
+-- DEBUG: Beginning Theta (theta())
+
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_s_notifyOfRightToRevoke U ((OS_s_notifyOfRightToRevoke &  X G !OS_s_notifyOfRightToRevoke) & !OS_s_notifyOfRightToRevoke)) |  (!OS_s_notifyOfRightToRevoke & O OS_s_notifyOfRightToRevoke))
+-- DEBUG: Completed Alpha bar (alphaBar())
+ & 
+-- DEBUG: Beginning Beta Bar for message (notifyOfRightToRevoke) (betaBar())
+(!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) | (O OS_s_notifyOfRightToRevoke)
+-- DEBUG: Completed Beta Bar for message (notifyOfRightToRevoke) (betaBar())
+ & 
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_r_notifyOfRightToRevoke U ((OS_r_notifyOfRightToRevoke &  X G !OS_r_notifyOfRightToRevoke) & !OS_r_notifyOfRightToRevoke)) |  (!OS_r_notifyOfRightToRevoke & O OS_r_notifyOfRightToRevoke))
+-- DEBUG: Completed Alpha bar (alphaBar())
+
+-- DEBUG: Completed Theta Bar (thetaBar())
+ & true)) & (((G !OS_s_verify) & (G !OS_r_verify) & (!true)) -> (G (!true))))
+
+
+----- BEGIN EXTRAS
+
+ & 
+-- DEBUG: Beginning Gamma Bar for CF (1) (gammaBar())
+
+(
+--- lifeline 1
+(
+((F OS_s_verify -> (((!OS_s_startTimer & !OS_r_authorize & !OS_s_notifyOfRightToRevoke) U (OS_s_verify & (!OS_s_startTimer & !OS_r_authorize & !OS_s_notifyOfRightToRevoke))))))
+
+ & ((F OS_s_startTimer -> (((!OS_s_checkTimer) U (OS_s_startTimer & (!OS_s_checkTimer))))) & (F OS_r_authorize -> (((!OS_s_checkTimer) U (OS_r_authorize & (!OS_s_checkTimer))))) & (F OS_s_notifyOfRightToRevoke -> (((!OS_s_checkTimer) U (OS_s_notifyOfRightToRevoke & (!OS_s_checkTimer)))))))
+
+----- lifeline2
+ & 
+((F OS_r_verify -> (((!OS_s_authorize & !OS_r_notifyOfRightToRevoke) U (OS_r_verify & (!OS_s_authorize & !OS_r_notifyOfRightToRevoke))))))
+ & 
+
+
+----lifeline 3
+((F OS_r_startTimer -> (((!OS_r_checkTimer) U (OS_r_startTimer & (!OS_r_checkTimer))))))
+
+)
+-- DEBUG: Completed Gamma Bar for CF (1) (gammaBar())
+
+
+
+
+
+ & 
+-- DEBUG: Beginning eta bar for CF (1) (etaBar())
+(F OS_s_verify -> (((!OS_s_checkTimer) U (OS_s_verify & (!OS_s_checkTimer)))))
+-- DEBUG: Completed eta bar for CF (1) (etaBar())
+ & 
+-- DEBUG: Beginning mu bar for CF (1) (muBar())
+((!OS_s_authorize U (OS_s_startTimer & !OS_s_authorize)) | G !OS_s_authorize)
+-- DEBUG: Completed mu bar for CF (1) (muBar())
+
+-- DEBUG: Completed Phi for cf (1) (phi())
+
+(
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_s_disclosePHI U ((OS_s_disclosePHI &  X G !OS_s_disclosePHI) & !OS_s_disclosePHI)) |  (!OS_s_disclosePHI & O OS_s_disclosePHI))
+-- DEBUG: Completed Alpha bar (alphaBar())
+)

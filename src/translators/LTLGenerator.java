@@ -23,17 +23,25 @@ public class LTLGenerator {
 		ArrayList<String> alpha = new ArrayList<String>();
 		ArrayList<String> beta = new ArrayList<String>();
 		for (Lifeline lifeline : sequenceDiagram.lifelines) {
-			alpha.add(formulas.alpha(lifeline));
-			beta.add(formulas.beta(lifeline));
+			if (lifeline.directedOSes.size() > 0) {
+				alpha.add(formulas.alpha(lifeline));
+				String betaTemp = formulas.beta(lifeline);
+				if (betaTemp.length() > 0)
+					beta.add(betaTemp);
+			}
 		}
-		ltl += Utils.conjunct(alpha);
-		ltl += "\n&\n" + Utils.conjunct(beta);
+		if (!alpha.isEmpty())
+			ltl += Utils.conjunct(alpha) + "\n&\n";
+
+		if (!beta.isEmpty())
+			ltl += Utils.conjunct(beta);
 
 		// for each CF in sequenceDiagram, print Phi
 		ArrayList<String> phi = new ArrayList<String>();
 		for (CF cf : sequenceDiagram.cfs)
 			phi.add(formulas.phiBar(cf));
-		ltl += "\n&\n" + Utils.conjunct(phi);
+		if (!phi.isEmpty())
+			ltl += "\n&\n" + Utils.conjunct(phi);
 
 		// if epsilon, print epsilon
 		if (epsilon)

@@ -23,9 +23,10 @@ public class Tester {
 	private static final boolean DEBUG = false;
 
 	public static void main(String[] args) {
-		// sequenceDiagrams.add(parseXML("testFiles/intermediate.xml", false));
-		// generateSMV(sequenceDiagrams.get(0));
-		System.out.println(conformance("testFiles/tester.xml", "testFiles/hipaa.xml"));
+//		 parseXML("jython/regulation.xml", false);
+//		regulation = parseXML("jython/policy.xml", false);
+//		System.out.println(regulation);
+		System.out.println(conformance("jython/policy.xml", "jython/regulation.xml"));
 	}
 
 	public static String conformance(String policyFile, String regulationFile) {

@@ -70,7 +70,7 @@ public class ModelGenerator {
 		for (SD sd : sds)
 			for (CF cf : sd.cfs)
 				for (Operand op : cf.operands)
-					if (!op.constraint.constraint.toLowerCase().equals("else"))
+					if (!op.constraint.constraint.toLowerCase().equals("else") && !op.constraint.constraint.toLowerCase().equals("true"))
 						constraints.add(op.constraint.constraint + " : boolean;");
 		// ELSE is converted in the formula. Macros are not needed.
 		// remove duplicates and generate String
@@ -169,15 +169,16 @@ public class ModelGenerator {
 		for (SD sd : sds)
 			for (CF cf : sd.cfs)
 				for (Operand op : cf.operands)
-					if (!op.constraint.constraint.toLowerCase().equals("else"))
+					if (!op.constraint.constraint.toLowerCase().equals("else") && !op.constraint.constraint.toLowerCase().equals("true"))
 						constraints.add("init(" + op.constraint.constraint + ") := " + initString + ";");
 
 		// remove duplicates and generate String
 		Set<String> uniques = new LinkedHashSet<String>(constraints);
 		for (String var : uniques)
 			constraintString += var + "\n";
-
-		return constraintString.substring(0, constraintString.length() - 1);
+		if(constraintString.length() > 0)
+			return constraintString.substring(0, constraintString.length() - 1);
+		return "";
 	}
 
 }

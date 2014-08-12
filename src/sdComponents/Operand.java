@@ -135,7 +135,8 @@ public class Operand {
 				if (!otherOp.equals(this))
 					otherConstraints.add("!" + otherOp.constraint.constraint);
 			return "(" + Utils.conjunct(otherConstraints) + ")";
-		}
+		}else if(constraint.constraint.toLowerCase().equals("true"))
+			return "TRUE";
 		return constraint.constraint;
 	}
 

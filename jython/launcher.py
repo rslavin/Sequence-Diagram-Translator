@@ -19,11 +19,11 @@ def main(policy_file, regulation_file):
 if __name__ == "__main__":
     # parse the command line arguments
     parser = argparse.ArgumentParser(description='Papyrus XML converter/SDAF')
-    parser.add_argument('-i', '--input',
-                        help='input file name', required=True)
-    parser.add_argument('-i2', '--input2',
-                        help='input file name', required=True)
+    parser.add_argument('-p', '--policy',
+                        help='policy file name', required=True)
+    parser.add_argument('-r', '--regulation',
+                        help='regulation file name', required=True)
     args = vars(parser.parse_args())
 
     # pass input file names to main
-    main(args['input'], args['input2'])
+    main(args['policy'], args['regulation'])

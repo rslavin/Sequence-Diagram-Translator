@@ -1,0 +1,190 @@
+MODULE main
+VAR
+OS_r_requestPHI: boolean;
+OS_s_verify: boolean;
+OS_s_startTimer: boolean;
+OS_s_notifyOfRightToRevoke: boolean;
+OS_r_authorize: boolean;
+OS_s_checkTimer: boolean;
+OS_r_notExpired: boolean;
+OS_s_disclosePHI: boolean;
+OS_s_requestPHI: boolean;
+OS_r_disclosePHI: boolean;
+OS_r_verify: boolean;
+OS_r_notifyOfRightToRevoke: boolean;
+OS_s_authorize: boolean;
+OS_r_startTimer: boolean;
+OS_r_checkTimer: boolean;
+OS_s_notExpired: boolean;
+exe1: boolean;
+exe2: boolean;
+NOTexpiredANDNOTrevoked : boolean;
+
+ASSIGN
+init(OS_r_requestPHI) := FALSE;
+init(OS_s_verify) := FALSE;
+init(OS_s_startTimer) := FALSE;
+init(OS_s_notifyOfRightToRevoke) := FALSE;
+init(OS_r_authorize) := FALSE;
+init(OS_s_checkTimer) := FALSE;
+init(OS_r_notExpired) := FALSE;
+init(OS_s_disclosePHI) := FALSE;
+init(OS_s_requestPHI) := FALSE;
+init(OS_r_disclosePHI) := FALSE;
+init(OS_r_verify) := FALSE;
+init(OS_r_notifyOfRightToRevoke) := FALSE;
+init(OS_s_authorize) := FALSE;
+init(OS_r_startTimer) := FALSE;
+init(OS_r_checkTimer) := FALSE;
+init(OS_s_notExpired) := FALSE;
+init(exe1) := FALSE;
+init(exe2) := FALSE;
+init(NOTexpiredANDNOTrevoked) := FALSE;
+
+LTLSPEC(
+(
+-- DEBUG: Beginning Alpha for lifeline (p1-CoveredEntity) (alpha())
+(!OS_s_verify U (OS_r_requestPHI & !OS_s_verify)) & (!OS_s_startTimer U (OS_s_verify & !OS_s_startTimer)) & (!OS_s_notifyOfRightToRevoke U (OS_s_startTimer & !OS_s_notifyOfRightToRevoke)) & (!OS_r_authorize U (OS_s_notifyOfRightToRevoke & !OS_r_authorize)) & (!OS_s_checkTimer U (OS_r_authorize & !OS_s_checkTimer)) & (!OS_r_notExpired U (OS_s_checkTimer & !OS_r_notExpired)) & (!OS_s_disclosePHI U (OS_r_notExpired & !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_s_verify U (OS_s_verify & X G !OS_s_verify)) & (!OS_s_startTimer U (OS_s_startTimer & X G !OS_s_startTimer)) & (!OS_s_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & X G !OS_s_notifyOfRightToRevoke)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize)) & (!OS_s_checkTimer U (OS_s_checkTimer & X G !OS_s_checkTimer)) & (!OS_r_notExpired U (OS_r_notExpired & X G !OS_r_notExpired)) & (!OS_s_disclosePHI U (OS_s_disclosePHI & X G !OS_s_disclosePHI))
+-- DEBUG: Completed Alpha for lifeline (p1-CoveredEntity) (alpha())
+ & 
+-- DEBUG: Beginning Alpha for lifeline (p2-HIPAARole) (alpha())
+(!OS_r_disclosePHI U (OS_s_requestPHI & !OS_r_disclosePHI)) & (!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI)) & (!OS_r_disclosePHI U (OS_r_disclosePHI & X G !OS_r_disclosePHI))
+-- DEBUG: Completed Alpha for lifeline (p2-HIPAARole) (alpha())
+ & 
+-- DEBUG: Beginning Alpha for lifeline (1-Individual) (alpha())
+(!OS_r_notifyOfRightToRevoke U (OS_r_verify & !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_r_notifyOfRightToRevoke & !OS_s_authorize)) & (!OS_r_verify U (OS_r_verify & X G !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_notifyOfRightToRevoke & X G !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_s_authorize & X G !OS_s_authorize))
+-- DEBUG: Completed Alpha for lifeline (1-Individual) (alpha())
+ & 
+-- DEBUG: Beginning Alpha for lifeline (r-Timer) (alpha())
+(!OS_r_checkTimer U (OS_r_startTimer & !OS_r_checkTimer)) & (!OS_s_notExpired U (OS_r_checkTimer & !OS_s_notExpired)) & (!OS_r_startTimer U (OS_r_startTimer & X G !OS_r_startTimer)) & (!OS_r_checkTimer U (OS_r_checkTimer & X G !OS_r_checkTimer)) & (!OS_s_notExpired U (OS_s_notExpired & X G !OS_s_notExpired))
+-- DEBUG: Completed Alpha for lifeline (r-Timer) (alpha())
+
+&
+
+-- DEBUG: Beginning Beta for lifeline (p1-CoveredEntity) (beta())
+(!OS_r_verify U (OS_s_verify & !OS_r_verify)) & (!OS_r_startTimer U (OS_s_startTimer & !OS_r_startTimer)) & (!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) & (!OS_r_checkTimer U (OS_s_checkTimer & !OS_r_checkTimer)) & (!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI))
+-- DEBUG: Completed Beta for lifeline (p1-CoveredEntity) (beta())
+ & 
+-- DEBUG: Beginning Beta for lifeline (p2-HIPAARole) (beta())
+(!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI))
+-- DEBUG: Completed Beta for lifeline (p2-HIPAARole) (beta())
+ & 
+-- DEBUG: Beginning Beta for lifeline (1-Individual) (beta())
+(!OS_r_authorize U (OS_s_authorize & !OS_r_authorize))
+-- DEBUG: Completed Beta for lifeline (1-Individual) (beta())
+ & 
+-- DEBUG: Beginning Beta for lifeline (r-Timer) (beta())
+(!OS_r_notExpired U (OS_s_notExpired & !OS_r_notExpired))
+-- DEBUG: Completed Beta for lifeline (r-Timer) (beta())
+
+) 
+
+
+->
+
+
+(
+-- DEBUG: Beginning Alpha for lifeline (p1-Covered-entity) (alpha())
+(!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_s_disclosePHI U (OS_s_disclosePHI & X G !OS_s_disclosePHI)) & (!OS_s_verify U (OS_s_verify & X G !OS_s_verify)) & (!OS_s_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & X G !OS_s_notifyOfRightToRevoke)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize)) & (!OS_s_disclosePHI U (OS_s_disclosePHI & X G !OS_s_disclosePHI))
+-- DEBUG: Completed Alpha for lifeline (p1-Covered-entity) (alpha())
+ & 
+-- DEBUG: Beginning Alpha for lifeline (p2-HIPAA-role) (alpha())
+(!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI)) & (!OS_r_disclosePHI U (OS_r_disclosePHI & X G !OS_r_disclosePHI)) & (!OS_r_disclosePHI U (OS_r_disclosePHI & X G !OS_r_disclosePHI))
+-- DEBUG: Completed Alpha for lifeline (p2-HIPAA-role) (alpha())
+ & 
+-- DEBUG: Beginning Alpha for lifeline (q-Individual) (alpha())
+(!OS_r_verify U (OS_r_verify & X G !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_notifyOfRightToRevoke & X G !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_s_authorize & X G !OS_s_authorize))
+-- DEBUG: Completed Alpha for lifeline (q-Individual) (alpha())
+
+&
+
+-- DEBUG: Beginning Beta for lifeline (p1-Covered-entity) (beta())
+(!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) & (!OS_r_verify U (OS_s_verify & !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) & (!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI))
+-- DEBUG: Completed Beta for lifeline (p1-Covered-entity) (beta())
+ & 
+-- DEBUG: Beginning Beta for lifeline (p2-HIPAA-role) (beta())
+(!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI))
+-- DEBUG: Completed Beta for lifeline (p2-HIPAA-role) (beta())
+ & 
+-- DEBUG: Beginning Beta for lifeline (q-Individual) (beta())
+(!OS_r_authorize U (OS_s_authorize & !OS_r_authorize))
+-- DEBUG: Completed Beta for lifeline (q-Individual) (beta())
+
+&
+
+-- DEBUG: Beginning Phi for cf (1) (phi())
+
+-- DEBUG: Beginning Phi Bar Alt for CF (1) (phiBarAlt())
+(G (((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) & exe1) -> (
+-- DEBUG: Beginning Theta (theta())
+((
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_s_disclosePHI U ((OS_s_disclosePHI &  X G !OS_s_disclosePHI) & !OS_s_disclosePHI)) |  (!OS_s_disclosePHI & O OS_s_disclosePHI))
+-- DEBUG: Completed Alpha bar (alphaBar())
+) & (
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_r_disclosePHI U ((OS_r_disclosePHI &  X G !OS_r_disclosePHI) & !OS_r_disclosePHI)) |  (!OS_r_disclosePHI & O OS_r_disclosePHI))
+-- DEBUG: Completed Alpha bar (alphaBar())
+)) & (
+-- DEBUG: Beginning Beta Bar for message (disclosePHI) (betaBar())
+(!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) | (O OS_s_disclosePHI)
+-- DEBUG: Completed Beta Bar for message (disclosePHI) (betaBar())
+)
+-- DEBUG: Completed Theta Bar (thetaBar())
+ & G exe1 & G NOTexpiredANDNOTrevoked)) & (((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) & (!exe1)) -> (G (!exe1) & G (!NOTexpiredANDNOTrevoked)))) & (G (((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) & exe2) -> (
+-- DEBUG: Beginning Theta (theta())
+((
+-- DEBUG: Beginning Alpha bar (alphaBar())
+(((!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke))) | (O OS_s_verify)) & (((!OS_r_authorize U (OS_s_notifyOfRightToRevoke & !OS_r_authorize))) | (O OS_s_notifyOfRightToRevoke)) & (((!OS_s_disclosePHI U (OS_r_authorize & !OS_s_disclosePHI))) | (O OS_r_authorize)) & ((!OS_s_verify U ((OS_s_verify &  X G !OS_s_verify) & !OS_s_verify)) |  (!OS_s_verify & O OS_s_verify)) & ((!OS_s_notifyOfRightToRevoke U ((OS_s_notifyOfRightToRevoke &  X G !OS_s_notifyOfRightToRevoke) & !OS_s_notifyOfRightToRevoke)) |  (!OS_s_notifyOfRightToRevoke & O OS_s_notifyOfRightToRevoke)) & ((!OS_r_authorize U ((OS_r_authorize &  X G !OS_r_authorize) & !OS_r_authorize)) |  (!OS_r_authorize & O OS_r_authorize)) & ((!OS_s_disclosePHI U ((OS_s_disclosePHI &  X G !OS_s_disclosePHI) & !OS_s_disclosePHI)) |  (!OS_s_disclosePHI & O OS_s_disclosePHI))
+-- DEBUG: Completed Alpha bar (alphaBar())
+) & (
+-- DEBUG: Beginning Alpha bar (alphaBar())
+((!OS_r_disclosePHI U ((OS_r_disclosePHI &  X G !OS_r_disclosePHI) & !OS_r_disclosePHI)) |  (!OS_r_disclosePHI & O OS_r_disclosePHI))
+-- DEBUG: Completed Alpha bar (alphaBar())
+) & (
+-- DEBUG: Beginning Alpha bar (alphaBar())
+(((!OS_r_notifyOfRightToRevoke U (OS_r_verify & !OS_r_notifyOfRightToRevoke))) | (O OS_r_verify)) & (((!OS_s_authorize U (OS_r_notifyOfRightToRevoke & !OS_s_authorize))) | (O OS_r_notifyOfRightToRevoke)) & ((!OS_r_verify U ((OS_r_verify &  X G !OS_r_verify) & !OS_r_verify)) |  (!OS_r_verify & O OS_r_verify)) & ((!OS_r_notifyOfRightToRevoke U ((OS_r_notifyOfRightToRevoke &  X G !OS_r_notifyOfRightToRevoke) & !OS_r_notifyOfRightToRevoke)) |  (!OS_r_notifyOfRightToRevoke & O OS_r_notifyOfRightToRevoke)) & ((!OS_s_authorize U ((OS_s_authorize &  X G !OS_s_authorize) & !OS_s_authorize)) |  (!OS_s_authorize & O OS_s_authorize))
+-- DEBUG: Completed Alpha bar (alphaBar())
+)) & (
+-- DEBUG: Beginning Beta Bar for message (verify) (betaBar())
+(!OS_r_verify U (OS_s_verify & !OS_r_verify)) | (O OS_s_verify)
+-- DEBUG: Completed Beta Bar for message (verify) (betaBar())
+) & (
+-- DEBUG: Beginning Beta Bar for message (notifyOfRightToRevoke) (betaBar())
+(!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) | (O OS_s_notifyOfRightToRevoke)
+-- DEBUG: Completed Beta Bar for message (notifyOfRightToRevoke) (betaBar())
+) & (
+-- DEBUG: Beginning Beta Bar for message (disclosePHI) (betaBar())
+(!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) | (O OS_s_disclosePHI)
+-- DEBUG: Completed Beta Bar for message (disclosePHI) (betaBar())
+) & (
+-- DEBUG: Beginning Beta Bar for message (authorize) (betaBar())
+(!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)) | (O OS_s_authorize)
+-- DEBUG: Completed Beta Bar for message (authorize) (betaBar())
+)
+-- DEBUG: Completed Theta Bar (thetaBar())
+ & G exe2 & G (!NOTexpiredANDNOTrevoked))) & (((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) & (!exe2)) -> (G (!exe2) & G (!(!NOTexpiredANDNOTrevoked))))) & 
+-- DEBUG: Beginning Gamma Bar for CF (1) (gammaBar())
+
+((F OS_r_requestPHI -> (((!OS_s_disclosePHI & !OS_s_verify & !OS_s_notifyOfRightToRevoke & !OS_r_authorize & !OS_s_disclosePHI) U (OS_r_requestPHI & (!OS_s_disclosePHI & !OS_s_verify & !OS_s_notifyOfRightToRevoke & !OS_r_authorize & !OS_s_disclosePHI))))))
+ & 
+((F OS_s_requestPHI -> (((!OS_r_disclosePHI & !OS_r_disclosePHI) U (OS_s_requestPHI & (!OS_r_disclosePHI & !OS_r_disclosePHI))))))
+
+-- DEBUG: Completed Gamma Bar for CF (1) (gammaBar())
+ & 
+-- DEBUG: Beginning mu bar for CF (1) (muBar())
+((!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke)) | G !OS_s_notifyOfRightToRevoke) & ((!OS_s_disclosePHI U (OS_s_verify & !OS_s_disclosePHI)) | G !OS_s_disclosePHI) & ((!OS_s_authorize U (OS_s_verify & !OS_s_authorize)) | G !OS_s_authorize)
+-- DEBUG: Completed mu bar for CF (1) (muBar())
+-- DEBUG: Beginning eta bar for CF (1) (etaBar())
+
+-- DEBUG: Completed eta bar for CF (1) (etaBar())
+ & 
+-- DEBUG: Beginning Nu for CF (1) (nu())
+G ((((exe1 xor exe2) & ((exe1 -> NOTexpiredANDNOTrevoked) & (exe2 -> (!NOTexpiredANDNOTrevoked)))) | ((!NOTexpiredANDNOTrevoked) & (!(!NOTexpiredANDNOTrevoked)))) & ((OS_s_disclosePHI -> exe1) & (OS_r_disclosePHI -> exe1) & (OS_s_verify -> exe2) & (OS_s_notifyOfRightToRevoke -> exe2) & (OS_r_authorize -> exe2) & (OS_s_disclosePHI -> exe2) & (OS_r_verify -> exe2) & (OS_r_notifyOfRightToRevoke -> exe2) & (OS_s_authorize -> exe2) & (OS_r_disclosePHI -> exe2)))
+-- DEBUG: Beginning Nu for CF (1) (nu())
+
+-- DEBUG: Completed Phi Bar Alt for CF (1) (phiBarAlt())
+
+-- DEBUG: Completed Phi for cf (1) (phi())
+)
+)

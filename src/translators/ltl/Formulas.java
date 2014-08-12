@@ -29,12 +29,12 @@ public class Formulas {
 			alpha += Utils.debugPrint("Beginning Alpha for lifeline (" + lifeline.name + ") (alpha())");
 		// First part of alpha
 		ArrayList<String> alpha1 = new ArrayList<String>();
-		for (int i = 0; i < lifeline.orderedElements.size() - 1; i++) {
-			if (lifeline.orderedElements.get(i) instanceof OS && lifeline.orderedElements.get(i + 1) instanceof OS) {
-				OS curOS = (OS) lifeline.orderedElements.get(i);
-				OS nextOS = (OS) lifeline.orderedElements.get(i + 1);
+		for (int i = 0; i < lifeline.directedOSes.size() - 1; i++) {
+			//if (lifeline.orderedElements.get(i) instanceof OS && lifeline.orderedElements.get(i + 1) instanceof OS) {
+				OS curOS = (OS) lifeline.directedOSes.get(i);
+				OS nextOS = (OS) lifeline.directedOSes.get(i + 1);
 				alpha1.add(Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()));
-			}
+			//}
 		}
 
 		alpha += Utils.conjunct(alpha1);
@@ -42,11 +42,11 @@ public class Formulas {
 		if (printAlpha2) {
 			// Second part of alpha
 			ArrayList<String> alpha2 = new ArrayList<String>();
-			for (OS os : lifeline.oses)
+			for (OS os : lifeline.directedOSes)
 				alpha2.add("(!" + os.ltlString() + " U (" + os.ltlString() + " & X G !" + os.ltlString() + "))");
 			if (alpha1.size() > 0)
 				alpha += " & ";
-			alpha += Utils.conjunct(alpha2);
+			alpha +=  Utils.conjunct(alpha2);
 
 		}
 		if (debug)
@@ -68,7 +68,7 @@ public class Formulas {
 			beta += Utils.debugPrint("Beginning Beta for lifeline (" + lifeline.name + ") (beta())");
 
 		ArrayList<String> betaConjuncts = new ArrayList<String>();
-		for (OS os : lifeline.oses)
+		for (OS os : lifeline.directedOSes)
 			if (os.osType.equals(OSType.SEND))
 				betaConjuncts.add(Utils.strongUntil("!" + os.ltlStringOp(), os.ltlString()));
 		beta += Utils.conjunct(betaConjuncts);
@@ -96,26 +96,46 @@ public class Formulas {
 		case ALT:
 			phi += phiBarAlt(cf);
 			break;
+//		case PAR:
+//			phi += phiBarPar(cf);
+//			break;
 		default:
 			ArrayList<String> phiList = new ArrayList<String>();
 			for (Operand operand : cf.operands)
 				phiList.add(phiBarOperand(operand));
 			phi += Utils.conjunct(phiList);
 			String gamma = gammaBar(cf);
-			if (gamma.length() > 1) // TODO set flags for these since debug will
-									// trip them
-				phi += " & " + gamma;
+			if (gamma.length() > 1) 
+				phi += " & (" + gamma + ")";
 			String eta = etaBar(cf);
 			if (eta.length() > 1)
-				phi += " & " + eta;
+				phi += " & (" + eta+ ")";
 			String mu = muBar(cf);
 			if (mu.length() > 1)
-				phi += " & " + mu;
+				phi += " & (" + mu+ ")";
 		}
 		if (debug)
 			phi += Utils.debugPrint("Completed Phi for cf (" + cf.num + ") (phi())");
 		return phi;
 	}
+	
+//	private String phiBarPar(CF cf){
+//		String phi = theta(cf);
+//		ArrayList<String> lifelineConjuncts = new ArrayList<String>();
+//		for(Lifeline lifeline : cf.lifelines)
+//			lifelineConjuncts.add(gamma(cf));
+//		return phi + Utils.conjunct(lifelineConjuncts);			
+//	}
+//	
+//	private String theta(CF cf){
+//		String theta = "";
+//		ArrayList<String> lifelineConjuncts = new ArrayList<String>();
+//		for(Lifeline lifeline : cf.lifelines){
+//			for(OS os : cf.lifelineCEU(lifeline).getOSes())
+//			
+//		}
+//		return theta;
+//	}
 
 	/**
 	 * Generates phi bar formula for operands. Called by phi().
@@ -189,17 +209,19 @@ public class Formulas {
 		if (debug)
 			theta += Utils.debugPrint("Beginning Theta (theta())");
 		// for all EUs in all Lifelines in the operand
-		ArrayList<String> thetaConjuncts = new ArrayList<String>();
+		ArrayList<String> alphaConjuncts = new ArrayList<String>();
+		ArrayList<String> betaConjuncts = new ArrayList<String>();
 		for (EU eu : op.eus) {
 			// TODO directedCEUs may need to be incorporated
 			if (eu.directedOSes != null && eu.directedOSes.size() > 0)
-				thetaConjuncts.add(alphaBar(eu));
+				alphaConjuncts.add("("+alphaBar(eu)+")");
 			for (OS os : eu.directedOSes) {
 				if (os.osType.equals(OSType.SEND))
-					thetaConjuncts.add(betaBar(os));
+					betaConjuncts.add("("+betaBar(os)+")");
 			}
 		}
-		theta += Utils.conjunct(thetaConjuncts);
+		theta += "(" + Utils.conjunct(alphaConjuncts) + ") & ";
+		theta += Utils.conjunct(betaConjuncts);
 
 		if (debug)
 			theta += Utils.debugPrint("Completed Theta Bar (thetaBar())");
@@ -337,8 +359,8 @@ public class Formulas {
 			if (eu.ordereds.get(i) instanceof OS && eu.ordereds.get(i + 1) instanceof OS) {
 				OS curOS = (OS) eu.ordereds.get(i);
 				OS nextOS = (OS) eu.ordereds.get(i + 1);
-				alpha1.add("(" + Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()) + ") | (O " + curOS.ltlString()
-						+ ")");
+				alpha1.add("((" + Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()) + ") | (O " + curOS.ltlString()
+						+ "))");
 			}
 		}
 
@@ -398,7 +420,7 @@ public class Formulas {
 		ArrayList<String> operandConjuncts = new ArrayList<String>();
 		for (Operand operand : cf.operands) {
 			// add to operandConjuncts
-			operandConjuncts.add(Utils.globally(phiBarAlt1(operand, cf) + " & " + phiBarAlt2(operand, cf)));
+			operandConjuncts.add("((" + Utils.globally(phiBarAlt1(operand, cf) + ") & (" + phiBarAlt2(operand, cf)) + "))");
 		}
 		String gamma = gammaBar(cf);
 		String mu = muBar(cf);
@@ -424,7 +446,7 @@ public class Formulas {
 	// TODO store exe values directly in Operands when parsing. Ask Hui.
 	private String phiBarAlt1(Operand operand, CF cf) {
 		// for each operand
-		ArrayList<String> innerOpConjuncts = new ArrayList<String>();
+		ArrayList<String> innerOpDisjuncts = new ArrayList<String>();
 		for (Operand innerOp : cf.operands) {
 			// for each pre os
 			ArrayList<String> preOSConjuncts = new ArrayList<String>();
@@ -433,9 +455,9 @@ public class Formulas {
 					preOSConjuncts.add("G (!" + ((OS) preOS).ltlString() + ")");
 				}
 			}
-			innerOpConjuncts.add(Utils.conjunct(preOSConjuncts));
+			innerOpDisjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
 		}
-		String phi = "(" + Utils.disjunct(innerOpConjuncts) + " & exe" + operand.exeNum + ") -> (" + thetaBar(operand) + " | G exe" + operand.exeNum
+		String phi = "((" + Utils.disjunct(innerOpDisjuncts) + ") & exe" + operand.exeNum + ") -> ((" + thetaBar(operand) + ") & G exe" + operand.exeNum
 				+ " & G " + operand.getConstraint();
 
 		// nested CFs
@@ -459,9 +481,9 @@ public class Formulas {
 					preOSConjuncts.add("G (!" + ((OS) preOS).ltlString() + ")");
 				}
 			}
-			innerOpDisjuncts.add(Utils.conjunct(preOSConjuncts));
+			innerOpDisjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
 		}
-		String phi = "(" + Utils.disjunct(innerOpDisjuncts) + " & (!exe" + operand.exeNum + ")) -> " + "(G (!exe" + operand.exeNum + ") & G (!"
+		String phi = "((" + Utils.disjunct(innerOpDisjuncts) + ") & (!exe" + operand.exeNum + ")) -> " + "(G (!exe" + operand.exeNum + ") & G (!"
 				+ operand.getConstraint() + ")";
 
 		// nested CFs
