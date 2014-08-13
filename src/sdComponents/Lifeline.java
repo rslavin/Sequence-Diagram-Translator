@@ -19,8 +19,8 @@ public class Lifeline {
 
 	// lists
 	public List<OS> oses;
-	public List<OS> directedOSes;
-	public List<CEU> directedCEUs;
+	public List<OS> directedOSes; // OSes directly enclosed
+	public List<CEU> directedCEUs; // CEUs directly enclosed
 	public List<Lifeline> connectedLifelines;
 	public List<Ordered> orderedElements;
 	public List<String> states;

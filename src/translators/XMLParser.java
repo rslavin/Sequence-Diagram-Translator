@@ -527,13 +527,18 @@ public class XMLParser {
 				Ordered ord = ordereds.get(i);
 				if (ord instanceof CEU) {
 					if (i == 0) // first
-						ord.postOrdereds.add(ordereds.get(i + 1));
+						// ord.postOrdereds.add(ordereds.get(i + 1));
+						ord.postOrdereds.addAll(ordereds.subList(i + 1, ordereds.size() - 1));
 					else if (i == ordereds.size() - 1)
-						ord.preOrdereds.add(ordereds.get(i - 1));
+						// ord.preOrdereds.add(ordereds.get(i - 1));
+						ord.preOrdereds.addAll(ordereds.subList(0, i));
 					else if (ordereds.size() > 2) {
-						ord.preOrdereds.add(ordereds.get(i - 1));
-						ord.postOrdereds.add(ordereds.get(i + 1));
+						ord.preOrdereds.addAll(ordereds.subList(0, i));
+						ord.postOrdereds.addAll(ordereds.subList(i, ordereds.size() - 1));
 					}
+					// ord.preOrdereds.add(ordereds.get(i - 1));
+					// ord.postOrdereds.add(ordereds.get(i + 1));
+					// }
 				}
 			}
 		}

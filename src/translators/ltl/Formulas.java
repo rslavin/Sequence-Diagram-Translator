@@ -193,8 +193,9 @@ public class Formulas {
 
 		ArrayList<String> phi1Conjuncts = new ArrayList<String>();
 		for (Ordered os : preOSes)
-			if (os instanceof OS)
+			if (os instanceof OS) 
 				phi1Conjuncts.add("(G !" + ((OS) os).ltlString() + ")");
+		// TODO if (os instanceof CEU) iterate through OSes in ceu and add them to phi1Conjuncts
 		String phi1 = Utils.conjunct(phi1Conjuncts) + " & " + op.getConstraint();
 		// end phi 1
 

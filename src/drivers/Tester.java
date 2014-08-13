@@ -19,7 +19,7 @@ public class Tester {
 	private static SD regulation;
 
 	private static final boolean ALPHA2 = true;
-	private static final boolean EPSILON = true;
+	private static final boolean EPSILON = false;
 	private static final boolean DEBUG = false;
 
 	public static void main(String[] args) {
