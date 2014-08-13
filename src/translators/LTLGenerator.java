@@ -45,7 +45,7 @@ public class LTLGenerator {
 
 		// if epsilon, print epsilon
 		if (epsilon)
-			;
+			ltl += "\n&\n" + formulas.epsilon(sequenceDiagram);
 		return ltl;
 	}
 }

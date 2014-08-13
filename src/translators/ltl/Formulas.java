@@ -30,11 +30,12 @@ public class Formulas {
 		// First part of alpha
 		ArrayList<String> alpha1 = new ArrayList<String>();
 		for (int i = 0; i < lifeline.directedOSes.size() - 1; i++) {
-			//if (lifeline.orderedElements.get(i) instanceof OS && lifeline.orderedElements.get(i + 1) instanceof OS) {
-				OS curOS = (OS) lifeline.directedOSes.get(i);
-				OS nextOS = (OS) lifeline.directedOSes.get(i + 1);
-				alpha1.add(Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()));
-			//}
+			// if (lifeline.orderedElements.get(i) instanceof OS &&
+			// lifeline.orderedElements.get(i + 1) instanceof OS) {
+			OS curOS = (OS) lifeline.directedOSes.get(i);
+			OS nextOS = (OS) lifeline.directedOSes.get(i + 1);
+			alpha1.add(Utils.strongUntil("!" + nextOS.ltlString(), curOS.ltlString()));
+			// }
 		}
 
 		alpha += Utils.conjunct(alpha1);
@@ -46,7 +47,7 @@ public class Formulas {
 				alpha2.add("(!" + os.ltlString() + " U (" + os.ltlString() + " & X G !" + os.ltlString() + "))");
 			if (alpha1.size() > 0)
 				alpha += " & ";
-			alpha +=  Utils.conjunct(alpha2);
+			alpha += Utils.conjunct(alpha2);
 
 		}
 		if (debug)
@@ -79,6 +80,42 @@ public class Formulas {
 	}
 
 	/**
+	 * Generate epsilon formula for a sequence diagram.
+	 * 
+	 * @param sd
+	 *            Sequence diagram to generate epsilon formula for.
+	 * @return
+	 */
+	public String epsilon(SD sd) {
+		String epsilon = "";
+		if (debug)
+			epsilon += Utils.debugPrint("Beginning Epsilon (beta())");
+		// loop through all OSes
+		ArrayList<String> osDisjuncts = new ArrayList<String>();
+		ArrayList<String> negOSConjuncts = new ArrayList<String>();
+		ArrayList<String> condConjuncts = new ArrayList<String>();
+		for (Lifeline lifeline : sd.lifelines) {
+			for (OS os : lifeline.oses) {
+				osDisjuncts.add(os.ltlString());
+				negOSConjuncts.add("(!" + os.ltlString() + ")");
+				if (!os.constraints.isEmpty())
+					for (Constraint constraint : os.constraints)
+						condConjuncts.add("(" + os.ltlString() + " -> " + constraint.operand.getConstraint() + ")");
+			}
+		}
+
+		String tempEpsilon = "(" + Utils.xor(osDisjuncts) + ") | (" + Utils.conjunct(negOSConjuncts) + ")";
+		if (!condConjuncts.isEmpty())
+			tempEpsilon += " & (" + Utils.conjunct(condConjuncts) + ")";
+
+		epsilon += Utils.globally(tempEpsilon);
+
+		if (debug)
+			epsilon += Utils.debugPrint("Completed Epsilon (beta())");
+		return epsilon;
+	}
+
+	/**
 	 * Generates phi bar formula for a combined fragment. For cases other than
 	 * LOOP or ALT, phiBarOperand is called and conjuncted with eta, mu, and
 	 * gamma.
@@ -96,46 +133,46 @@ public class Formulas {
 		case ALT:
 			phi += phiBarAlt(cf);
 			break;
-//		case PAR:
-//			phi += phiBarPar(cf);
-//			break;
+		// case PAR:
+		// phi += phiBarPar(cf);
+		// break;
 		default:
 			ArrayList<String> phiList = new ArrayList<String>();
 			for (Operand operand : cf.operands)
 				phiList.add(phiBarOperand(operand));
 			phi += Utils.conjunct(phiList);
 			String gamma = gammaBar(cf);
-			if (gamma.length() > 1) 
+			if (gamma.length() > 1)
 				phi += " & (" + gamma + ")";
 			String eta = etaBar(cf);
 			if (eta.length() > 1)
-				phi += " & (" + eta+ ")";
+				phi += " & (" + eta + ")";
 			String mu = muBar(cf);
 			if (mu.length() > 1)
-				phi += " & (" + mu+ ")";
+				phi += " & (" + mu + ")";
 		}
 		if (debug)
 			phi += Utils.debugPrint("Completed Phi for cf (" + cf.num + ") (phi())");
 		return phi;
 	}
-	
-//	private String phiBarPar(CF cf){
-//		String phi = theta(cf);
-//		ArrayList<String> lifelineConjuncts = new ArrayList<String>();
-//		for(Lifeline lifeline : cf.lifelines)
-//			lifelineConjuncts.add(gamma(cf));
-//		return phi + Utils.conjunct(lifelineConjuncts);			
-//	}
-//	
-//	private String theta(CF cf){
-//		String theta = "";
-//		ArrayList<String> lifelineConjuncts = new ArrayList<String>();
-//		for(Lifeline lifeline : cf.lifelines){
-//			for(OS os : cf.lifelineCEU(lifeline).getOSes())
-//			
-//		}
-//		return theta;
-//	}
+
+	// private String phiBarPar(CF cf){
+	// String phi = theta(cf);
+	// ArrayList<String> lifelineConjuncts = new ArrayList<String>();
+	// for(Lifeline lifeline : cf.lifelines)
+	// lifelineConjuncts.add(gamma(cf));
+	// return phi + Utils.conjunct(lifelineConjuncts);
+	// }
+	//
+	// private String theta(CF cf){
+	// String theta = "";
+	// ArrayList<String> lifelineConjuncts = new ArrayList<String>();
+	// for(Lifeline lifeline : cf.lifelines){
+	// for(OS os : cf.lifelineCEU(lifeline).getOSes())
+	//
+	// }
+	// return theta;
+	// }
 
 	/**
 	 * Generates phi bar formula for operands. Called by phi().
@@ -214,10 +251,10 @@ public class Formulas {
 		for (EU eu : op.eus) {
 			// TODO directedCEUs may need to be incorporated
 			if (eu.directedOSes != null && eu.directedOSes.size() > 0)
-				alphaConjuncts.add("("+alphaBar(eu)+")");
+				alphaConjuncts.add("(" + alphaBar(eu) + ")");
 			for (OS os : eu.directedOSes) {
 				if (os.osType.equals(OSType.SEND))
-					betaConjuncts.add("("+betaBar(os)+")");
+					betaConjuncts.add("(" + betaBar(os) + ")");
 			}
 		}
 		theta += "(" + Utils.conjunct(alphaConjuncts) + ") & ";
@@ -457,8 +494,8 @@ public class Formulas {
 			}
 			innerOpDisjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
 		}
-		String phi = "((" + Utils.disjunct(innerOpDisjuncts) + ") & exe" + operand.exeNum + ") -> ((" + thetaBar(operand) + ") & G exe" + operand.exeNum
-				+ " & G " + operand.getConstraint();
+		String phi = "((" + Utils.disjunct(innerOpDisjuncts) + ") & exe" + operand.exeNum + ") -> ((" + thetaBar(operand)
+				+ ") & G exe" + operand.exeNum + " & G " + operand.getConstraint();
 
 		// nested CFs
 		ArrayList<String> nestedCFConjuncts = new ArrayList<String>();
@@ -483,8 +520,8 @@ public class Formulas {
 			}
 			innerOpDisjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
 		}
-		String phi = "((" + Utils.disjunct(innerOpDisjuncts) + ") & (!exe" + operand.exeNum + ")) -> " + "(G (!exe" + operand.exeNum + ") & G (!"
-				+ operand.getConstraint() + ")";
+		String phi = "((" + Utils.disjunct(innerOpDisjuncts) + ") & (!exe" + operand.exeNum + ")) -> " + "(G (!exe"
+				+ operand.exeNum + ") & G (!" + operand.getConstraint() + ")";
 
 		// nested CFs
 		ArrayList<String> nestedOperands = new ArrayList<String>();

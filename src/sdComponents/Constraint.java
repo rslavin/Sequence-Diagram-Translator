@@ -14,6 +14,7 @@ public class Constraint {
 	public EU eu;
 	public String euLabel;
 	public int num;
+	public Operand operand;
 
 	public int minIteration;
 	public int maxIteration;

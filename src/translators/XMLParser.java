@@ -227,6 +227,7 @@ public class XMLParser {
 		Constraint constraint = new Constraint(elementValue(xmlConstraint, "name"), sequenceDiagram.getLifeline(elementValue(
 				xmlConstraint, "lifeline")));
 		Operand op = new Operand(constraint, opNum++);
+		constraint.operand = op;
 		op.lifelines = new ArrayList<Lifeline>(lifelines);
 		op.msgNums = msgNums;
 		op.nestedCFs = combinedFragments;

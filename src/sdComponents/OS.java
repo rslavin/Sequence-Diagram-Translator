@@ -1,5 +1,6 @@
 package sdComponents;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.w3c.dom.Element;
@@ -37,6 +38,7 @@ public class OS extends Ordered {
 		this.osType = osType;
 		this.messageType = messageType;
 		this.iteration = 0;
+		this.constraints = new ArrayList<Constraint>();
 	}
 
 	public OS(Lifeline lifeline, String name, int number, OSType osType, MessageType messageType) {
@@ -46,6 +48,7 @@ public class OS extends Ordered {
 		this.osType = osType;
 		this.messageType = messageType;
 		this.iteration = 0;
+		this.constraints = new ArrayList<Constraint>();
 	}
 
 	public void parseConnectedLifeline(NodeList lifelineNodes, SD sequenceDiagram) {
