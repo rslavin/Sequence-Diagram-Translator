@@ -192,10 +192,12 @@ public class Formulas {
 			preOSes.addAll(ceu.preOrdereds);
 
 		ArrayList<String> phi1Conjuncts = new ArrayList<String>();
-		for (Ordered os : preOSes)
-			if (os instanceof OS) 
-				phi1Conjuncts.add("(G !" + ((OS) os).ltlString() + ")");
-		// TODO if (os instanceof CEU) iterate through OSes in ceu and add them to phi1Conjuncts
+		for (Ordered ordered : preOSes)
+			if (ordered instanceof OS)
+				phi1Conjuncts.add("(G !" + ((OS) ordered).ltlString() + ")");
+			else if (ordered instanceof CEU)
+				for (OS os : ((CEU) ordered).getOSes())
+					phi1Conjuncts.add("(G !" + os.ltlString() + ")");
 		String phi1 = Utils.conjunct(phi1Conjuncts) + " & " + op.getConstraint();
 		// end phi 1
 
@@ -277,14 +279,22 @@ public class Formulas {
 			// for each pre os
 			ArrayList<String> preOSConjuncts = new ArrayList<String>();
 			for (Ordered preOS : ceu.preOrdereds) {
+				ArrayList<String> tosConjuncts1 = new ArrayList<String>();
 				if (preOS instanceof OS) {
-					// for each tOS
-					ArrayList<String> tosConjuncts1 = new ArrayList<String>();
+					// for each tOS (not nested OSes)
 					for (OS tOS : ceu.getOSes())
 						tosConjuncts1.add("!" + tOS.ltlString());
 					if (!tosConjuncts1.isEmpty())
 						preOSConjuncts.add("(F " + ((OS) preOS).ltlString() + " -> ("
 								+ Utils.strongUntil("(" + Utils.conjunct(tosConjuncts1) + ")", ((OS) preOS).ltlString()) + "))");
+				} else if (preOS instanceof CEU){
+					for(OS os : ((CEU) preOS).getOSes()){
+						for (OS tOS : ceu.getOSes())
+							tosConjuncts1.add("!" + tOS.ltlString());
+						if (!tosConjuncts1.isEmpty())
+							preOSConjuncts.add("(F " + os.ltlString() + " -> ("
+									+ Utils.strongUntil("(" + Utils.conjunct(tosConjuncts1) + ")", os.ltlString()) + "))");
+					}
 				}
 			}
 
@@ -293,9 +303,12 @@ public class Formulas {
 			for (OS tOS : ceu.getOSes()) {
 				// for each post OS
 				ArrayList<String> postOSConjuncts = new ArrayList<String>();
-				for (Ordered postOS : ceu.postOrdereds)
-					if (postOS instanceof OS)
-						postOSConjuncts.add("!" + ((OS) postOS).ltlString());
+				for (Ordered ordered : ceu.postOrdereds)
+					if (ordered instanceof OS)
+						postOSConjuncts.add("!" + ((OS) ordered).ltlString());
+					else if (ordered instanceof CEU)
+						for (OS os : ((CEU) ordered).getOSes())
+							postOSConjuncts.add("!" + os.ltlString());
 				if (!postOSConjuncts.isEmpty())
 					tOSConjuncts2.add("(F " + tOS.ltlString() + " -> ("
 							+ Utils.strongUntil("(" + Utils.conjunct(postOSConjuncts) + ")", tOS.ltlString()) + "))");
@@ -330,16 +343,31 @@ public class Formulas {
 					&& cf.lifelineCEU(lifeline).postOrdereds.size() > 0) {
 				CEU ceu = cf.lifelineCEU(lifeline);
 				for (Ordered preOS : ceu.preOrdereds) {
+					ArrayList<String> postOSConjuncts = new ArrayList<String>();
 					if (preOS instanceof OS) {
-						ArrayList<String> postOSConjuncts = new ArrayList<String>();
 						// for each post OS
-						for (Ordered postOS : ceu.postOrdereds) {
-							if (postOS instanceof OS) {
-								postOSConjuncts.add("!" + ((OS) postOS).ltlString());
-							}
+						for (Ordered ordered : ceu.postOrdereds) {
+							if (ordered instanceof OS) {
+								postOSConjuncts.add("!" + ((OS) ordered).ltlString());
+							} else if (ordered instanceof CEU)
+								for (OS os : ((CEU) ordered).getOSes())
+									postOSConjuncts.add("!" + os.ltlString());
 						}
 						preOSConjuncts.add("F " + ((OS) preOS).ltlString() + " -> ("
 								+ Utils.strongUntil("(" + Utils.conjunct(postOSConjuncts) + ")", ((OS) preOS).ltlString()) + ")");
+					} else if (preOS instanceof CEU) {
+						for (OS os : ((CEU) preOS).getOSes()) {
+							// for each post OS
+							for (Ordered ordered : ceu.postOrdereds) {
+								if (ordered instanceof OS) {
+									postOSConjuncts.add("!" + ((OS) ordered).ltlString());
+								} else if (ordered instanceof CEU)
+									for (OS postOS : ((CEU) ordered).getOSes())
+										postOSConjuncts.add("!" + postOS.ltlString());
+							}
+							preOSConjuncts.add("F " + os.ltlString() + " -> ("
+									+ Utils.strongUntil("(" + Utils.conjunct(postOSConjuncts) + ")", os.ltlString()) + ")");
+						}
 					}
 				}
 				lifelineConjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
@@ -491,7 +519,9 @@ public class Formulas {
 			for (Ordered preOS : innerOp.getPreOrdereds()) {
 				if (preOS instanceof OS) {
 					preOSConjuncts.add("G (!" + ((OS) preOS).ltlString() + ")");
-				}
+				} else if (preOS instanceof CEU)
+					for (OS os : ((CEU) preOS).getOSes())
+						preOSConjuncts.add("G (!" + os.ltlString() + ")");
 			}
 			innerOpDisjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
 		}
@@ -514,10 +544,12 @@ public class Formulas {
 		for (Operand innerOp : cf.operands) {
 			// for each pre os
 			ArrayList<String> preOSConjuncts = new ArrayList<String>();
-			for (Ordered preOS : innerOp.getPreOrdereds()) {
-				if (preOS instanceof OS) {
-					preOSConjuncts.add("G (!" + ((OS) preOS).ltlString() + ")");
-				}
+			for (Ordered ordered : innerOp.getPreOrdereds()) {
+				if (ordered instanceof OS) {
+					preOSConjuncts.add("G (!" + ((OS) ordered).ltlString() + ")");
+				} else if (ordered instanceof CEU)
+					for (OS os : ((CEU) ordered).getOSes())
+						preOSConjuncts.add("G (!" + os.ltlString() + ")");
 			}
 			innerOpDisjuncts.add("(" + Utils.conjunct(preOSConjuncts) + ")");
 		}
