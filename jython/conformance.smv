@@ -1,63 +1,48 @@
 MODULE main
 VAR
-OS_s_notifyOfRightToRevoke: boolean;
-OS_s_startTimer: boolean;
-OS_s_checkTimer: boolean;
 OS_s_verify: boolean;
+OS_s_notifyOfRightToRevoke: boolean;
 OS_s_disclosePHI: boolean;
 OS_r_requestPHI: boolean;
 OS_r_authorize: boolean;
-OS_r_notExpired: boolean;
 OS_s_requestPHI: boolean;
 OS_r_disclosePHI: boolean;
 OS_s_authorize: boolean;
-OS_r_notifyOfRightToRevoke: boolean;
 OS_r_verify: boolean;
-OS_s_notExpired: boolean;
-OS_r_startTimer: boolean;
-OS_r_checkTimer: boolean;
-
-NOTRevoked : boolean;
+OS_r_notifyOfRightToRevoke: boolean;
+exe1: boolean;
+exe2: boolean;
+NOTexpiredANDNOTrevoked : boolean;
 
 ASSIGN
-init(OS_s_notifyOfRightToRevoke) := FALSE;
-init(OS_s_startTimer) := FALSE;
-init(OS_s_checkTimer) := FALSE;
 init(OS_s_verify) := FALSE;
+init(OS_s_notifyOfRightToRevoke) := FALSE;
 init(OS_s_disclosePHI) := FALSE;
 init(OS_r_requestPHI) := FALSE;
 init(OS_r_authorize) := FALSE;
-init(OS_r_notExpired) := FALSE;
 init(OS_s_requestPHI) := FALSE;
 init(OS_r_disclosePHI) := FALSE;
 init(OS_s_authorize) := FALSE;
-init(OS_r_notifyOfRightToRevoke) := FALSE;
 init(OS_r_verify) := FALSE;
-init(OS_s_notExpired) := FALSE;
-init(OS_r_startTimer) := FALSE;
-init(OS_r_checkTimer) := FALSE;
-init(NOTRevoked) := FALSE;
+init(OS_r_notifyOfRightToRevoke) := FALSE;
+init(exe1) := FALSE;
+init(exe2) := FALSE;
+init(NOTexpiredANDNOTrevoked) := FALSE;
 
 LTLSPEC(
-((!OS_s_verify U (OS_s_checkTimer & !OS_s_verify)) & (!OS_r_requestPHI U (OS_s_verify & !OS_r_requestPHI)) & (!OS_s_checkTimer U (OS_s_checkTimer & X G !OS_s_checkTimer)) & (!OS_s_verify U (OS_s_verify & X G !OS_s_verify)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_r_notExpired U (OS_r_notExpired & X G !OS_r_notExpired)) & (!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI)) & (!OS_r_verify U (OS_r_verify & X G !OS_r_verify)) & (!OS_s_notExpired U (OS_s_notExpired & X G !OS_s_notExpired)) & (!OS_r_checkTimer U (OS_r_checkTimer & X G !OS_r_checkTimer))
+((!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke)) & (!OS_s_disclosePHI U (OS_s_notifyOfRightToRevoke & !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_s_disclosePHI & !OS_r_requestPHI)) & (!OS_r_authorize U (OS_r_requestPHI & !OS_r_authorize)) & (!OS_s_verify U (OS_s_verify & X G !OS_s_verify)) & (!OS_s_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & X G !OS_s_notifyOfRightToRevoke)) & (!OS_s_disclosePHI U (OS_s_disclosePHI & X G !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize)) & (!OS_r_disclosePHI U (OS_s_requestPHI & !OS_r_disclosePHI)) & (!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI)) & (!OS_r_disclosePHI U (OS_r_disclosePHI & X G !OS_r_disclosePHI)) & (!OS_r_verify U (OS_s_authorize & !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_verify & !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_s_authorize & X G !OS_s_authorize)) & (!OS_r_verify U (OS_r_verify & X G !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_notifyOfRightToRevoke & X G !OS_r_notifyOfRightToRevoke))
 &
-(!OS_r_checkTimer U (OS_s_checkTimer & !OS_r_checkTimer)) & (!OS_r_verify U (OS_s_verify & !OS_r_verify)) & (!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI)) & (!OS_r_notExpired U (OS_s_notExpired & !OS_r_notExpired))
-&
-G ((((G !OS_r_verify) & TRUE) -> ((((((!OS_r_authorize U (OS_s_startTimer & !OS_r_authorize))) | (O OS_s_startTimer)) & ((!OS_s_startTimer U ((OS_s_startTimer &  X G !OS_s_startTimer) & !OS_s_startTimer)) |  (!OS_s_startTimer & O OS_s_startTimer)) & ((!OS_r_authorize U ((OS_r_authorize &  X G !OS_r_authorize) & !OS_r_authorize)) |  (!OS_r_authorize & O OS_r_authorize))) & (((!OS_s_authorize U ((OS_s_authorize &  X G !OS_s_authorize) & !OS_s_authorize)) |  (!OS_s_authorize & O OS_s_authorize))) & (((!OS_r_startTimer U ((OS_r_startTimer &  X G !OS_r_startTimer) & !OS_r_startTimer)) |  (!OS_r_startTimer & O OS_r_startTimer)))) & ((!OS_r_startTimer U (OS_s_startTimer & !OS_r_startTimer)) | (O OS_s_startTimer)) & ((!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)) | (O OS_s_authorize)) & TRUE)) & (((G !OS_r_verify) & (!TRUE)) -> (G (!TRUE)))) & G ((((G !OS_r_verify) & TRUE) -> (((((!OS_s_notifyOfRightToRevoke U ((OS_s_notifyOfRightToRevoke &  X G !OS_s_notifyOfRightToRevoke) & !OS_s_notifyOfRightToRevoke)) |  (!OS_s_notifyOfRightToRevoke & O OS_s_notifyOfRightToRevoke))) & (((!OS_r_notifyOfRightToRevoke U ((OS_r_notifyOfRightToRevoke &  X G !OS_r_notifyOfRightToRevoke) & !OS_r_notifyOfRightToRevoke)) |  (!OS_r_notifyOfRightToRevoke & O OS_r_notifyOfRightToRevoke)))) & ((!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) | (O OS_s_notifyOfRightToRevoke)) & TRUE)) & (((G !OS_r_verify) & (!TRUE)) -> (G (!TRUE)))) & (
-((F OS_s_startTimer -> (((!OS_s_checkTimer) U (OS_s_startTimer & (!OS_s_checkTimer))))) & (F OS_r_authorize -> (((!OS_s_checkTimer) U (OS_r_authorize & (!OS_s_checkTimer))))) & (F OS_s_notifyOfRightToRevoke -> (((!OS_s_checkTimer) U (OS_s_notifyOfRightToRevoke & (!OS_s_checkTimer))))))
- & 
-((F OS_r_verify -> (((!OS_s_authorize & !OS_r_notifyOfRightToRevoke) U (OS_r_verify & (!OS_s_authorize & !OS_r_notifyOfRightToRevoke))))))
- & 
-((F OS_r_startTimer -> (((!OS_s_notExpired) U (OS_r_startTimer & (!OS_s_notExpired))))))
-) & (((!OS_s_authorize U (OS_s_startTimer & !OS_s_authorize)) | G !OS_s_authorize)) & G ((((G !OS_r_notExpired) & (G !OS_s_requestPHI) & NOTRevoked) -> (((((!OS_s_disclosePHI U ((OS_s_disclosePHI &  X G !OS_s_disclosePHI) & !OS_s_disclosePHI)) |  (!OS_s_disclosePHI & O OS_s_disclosePHI))) & (((!OS_r_disclosePHI U ((OS_r_disclosePHI &  X G !OS_r_disclosePHI) & !OS_r_disclosePHI)) |  (!OS_r_disclosePHI & O OS_r_disclosePHI)))) & ((!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) | (O OS_s_disclosePHI)) & NOTRevoked)) & (((G !OS_r_notExpired) & (G !OS_s_requestPHI) & (!NOTRevoked)) -> (G (!NOTRevoked)))) & (
-((F OS_r_notExpired -> (((!OS_s_disclosePHI) U (OS_r_notExpired & (!OS_s_disclosePHI))))))
- & 
-((F OS_s_requestPHI -> (((!OS_r_disclosePHI) U (OS_s_requestPHI & (!OS_r_disclosePHI))))))
-)) 
+(!OS_r_verify U (OS_s_verify & !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) & (!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) & (!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI)) & (!OS_r_authorize U (OS_s_authorize & !OS_r_authorize))) 
 
 ->
 
-((!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke)) & (!OS_s_disclosePHI U (OS_s_notifyOfRightToRevoke & !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_s_disclosePHI & !OS_r_requestPHI)) & (!OS_r_authorize U (OS_r_requestPHI & !OS_r_authorize)) & (!OS_s_verify U (OS_s_verify & X G !OS_s_verify)) & (!OS_s_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & X G !OS_s_notifyOfRightToRevoke)) & (!OS_s_disclosePHI U (OS_s_disclosePHI & X G !OS_s_disclosePHI)) & (!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_r_authorize U (OS_r_authorize & X G !OS_r_authorize)) & (!OS_r_disclosePHI U (OS_s_requestPHI & !OS_r_disclosePHI)) & (!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI)) & (!OS_r_disclosePHI U (OS_r_disclosePHI & X G !OS_r_disclosePHI)) & (!OS_r_verify U (OS_s_authorize & !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_verify & !OS_r_notifyOfRightToRevoke)) & (!OS_s_authorize U (OS_s_authorize & X G !OS_s_authorize)) & (!OS_r_verify U (OS_r_verify & X G !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_r_notifyOfRightToRevoke & X G !OS_r_notifyOfRightToRevoke))
+((!OS_r_requestPHI U (OS_r_requestPHI & X G !OS_r_requestPHI)) & (!OS_s_requestPHI U (OS_s_requestPHI & X G !OS_s_requestPHI))
 &
-(!OS_r_verify U (OS_s_verify & !OS_r_verify)) & (!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) & (!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) & (!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI)) & (!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)))
+(!OS_r_requestPHI U (OS_s_requestPHI & !OS_r_requestPHI))
+&
+((G ((((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI))) & exe1) -> ((((((!OS_s_disclosePHI U ((OS_s_disclosePHI &  X G !OS_s_disclosePHI) & !OS_s_disclosePHI)) |  (!OS_s_disclosePHI & O OS_s_disclosePHI))) & (((!OS_r_disclosePHI U ((OS_r_disclosePHI &  X G !OS_r_disclosePHI) & !OS_r_disclosePHI)) |  (!OS_r_disclosePHI & O OS_r_disclosePHI)))) & ((!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) | (O OS_s_disclosePHI))) & G exe1 & G NOTexpiredANDNOTrevoked)) & ((((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI))) & (!exe1)) -> (G (!exe1) & G (!NOTexpiredANDNOTrevoked))))) & ((G ((((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI))) & exe2) -> (((((((!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke))) | (O OS_s_verify)) & (((!OS_r_authorize U (OS_s_notifyOfRightToRevoke & !OS_r_authorize))) | (O OS_s_notifyOfRightToRevoke)) & (((!OS_s_disclosePHI U (OS_r_authorize & !OS_s_disclosePHI))) | (O OS_r_authorize)) & ((!OS_s_verify U ((OS_s_verify &  X G !OS_s_verify) & !OS_s_verify)) |  (!OS_s_verify & O OS_s_verify)) & ((!OS_s_notifyOfRightToRevoke U ((OS_s_notifyOfRightToRevoke &  X G !OS_s_notifyOfRightToRevoke) & !OS_s_notifyOfRightToRevoke)) |  (!OS_s_notifyOfRightToRevoke & O OS_s_notifyOfRightToRevoke)) & ((!OS_r_authorize U ((OS_r_authorize &  X G !OS_r_authorize) & !OS_r_authorize)) |  (!OS_r_authorize & O OS_r_authorize)) & ((!OS_s_disclosePHI U ((OS_s_disclosePHI &  X G !OS_s_disclosePHI) & !OS_s_disclosePHI)) |  (!OS_s_disclosePHI & O OS_s_disclosePHI))) & (((!OS_r_disclosePHI U ((OS_r_disclosePHI &  X G !OS_r_disclosePHI) & !OS_r_disclosePHI)) |  (!OS_r_disclosePHI & O OS_r_disclosePHI))) & ((((!OS_r_notifyOfRightToRevoke U (OS_r_verify & !OS_r_notifyOfRightToRevoke))) | (O OS_r_verify)) & (((!OS_s_authorize U (OS_r_notifyOfRightToRevoke & !OS_s_authorize))) | (O OS_r_notifyOfRightToRevoke)) & ((!OS_r_verify U ((OS_r_verify &  X G !OS_r_verify) & !OS_r_verify)) |  (!OS_r_verify & O OS_r_verify)) & ((!OS_r_notifyOfRightToRevoke U ((OS_r_notifyOfRightToRevoke &  X G !OS_r_notifyOfRightToRevoke) & !OS_r_notifyOfRightToRevoke)) |  (!OS_r_notifyOfRightToRevoke & O OS_r_notifyOfRightToRevoke)) & ((!OS_s_authorize U ((OS_s_authorize &  X G !OS_s_authorize) & !OS_s_authorize)) |  (!OS_s_authorize & O OS_s_authorize)))) & ((!OS_r_verify U (OS_s_verify & !OS_r_verify)) | (O OS_s_verify)) & ((!OS_r_notifyOfRightToRevoke U (OS_s_notifyOfRightToRevoke & !OS_r_notifyOfRightToRevoke)) | (O OS_s_notifyOfRightToRevoke)) & ((!OS_r_disclosePHI U (OS_s_disclosePHI & !OS_r_disclosePHI)) | (O OS_s_disclosePHI)) & ((!OS_r_authorize U (OS_s_authorize & !OS_r_authorize)) | (O OS_s_authorize))) & G exe2 & G (!NOTexpiredANDNOTrevoked))) & ((((G (!OS_r_requestPHI) & G (!OS_s_requestPHI)) | (G (!OS_r_requestPHI) & G (!OS_s_requestPHI))) & (!exe2)) -> (G (!exe2) & G (!(!NOTexpiredANDNOTrevoked)))))) & 
+((F OS_r_requestPHI -> (((!OS_s_disclosePHI & !OS_s_verify & !OS_s_notifyOfRightToRevoke & !OS_s_disclosePHI & !OS_r_authorize) U (OS_r_requestPHI & (!OS_s_disclosePHI & !OS_s_verify & !OS_s_notifyOfRightToRevoke & !OS_s_disclosePHI & !OS_r_authorize))))))
+ & 
+((F OS_s_requestPHI -> (((!OS_r_disclosePHI & !OS_r_disclosePHI) U (OS_s_requestPHI & (!OS_r_disclosePHI & !OS_r_disclosePHI))))))
+ & ((!OS_s_notifyOfRightToRevoke U (OS_s_verify & !OS_s_notifyOfRightToRevoke)) | G !OS_s_notifyOfRightToRevoke) & ((!OS_s_disclosePHI U (OS_s_verify & !OS_s_disclosePHI)) | G !OS_s_disclosePHI) & ((!OS_s_authorize U (OS_s_verify & !OS_s_authorize)) | G !OS_s_authorize) & G ((((exe1 xor exe2) & ((exe1 -> NOTexpiredANDNOTrevoked) & (exe2 -> (!NOTexpiredANDNOTrevoked)))) | ((!NOTexpiredANDNOTrevoked) & (!(!NOTexpiredANDNOTrevoked)))) & ((OS_s_disclosePHI -> exe1) & (OS_r_disclosePHI -> exe1) & (OS_s_verify -> exe2) & (OS_s_notifyOfRightToRevoke -> exe2) & (OS_s_disclosePHI -> exe2) & (OS_r_authorize -> exe2) & (OS_s_authorize -> exe2) & (OS_r_verify -> exe2) & (OS_r_notifyOfRightToRevoke -> exe2) & (OS_r_disclosePHI -> exe2))))
 )
