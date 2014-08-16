@@ -48,4 +48,14 @@ public class Constraint {
 		return ret;
 	}
 
+	/**
+	 * Returns constraint, converting "else" into conjunction of negation of
+	 * other constraints in the CF.
+	 * 
+	 * @return
+	 */
+	public String getConstraint() {
+		return operand.getConstraint();
+	}
+
 }

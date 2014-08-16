@@ -278,28 +278,40 @@ public class Formulas {
 		for (CEU ceu : cf.ceus) {
 			// for each pre os
 			ArrayList<String> preOSConjuncts = new ArrayList<String>();
-			for (Ordered preOS : ceu.preOrdereds) {
-				ArrayList<String> tosConjuncts1 = new ArrayList<String>();
-				if (preOS instanceof OS) {
-					// for each tOS (not nested OSes)
-					for (OS tOS : ceu.getOSes())
-						tosConjuncts1.add("!" + tOS.ltlString());
-					if (!tosConjuncts1.isEmpty())
-						preOSConjuncts.add("(F " + ((OS) preOS).ltlString() + " -> ("
-								+ Utils.strongUntil("(" + Utils.conjunct(tosConjuncts1) + ")", ((OS) preOS).ltlString()) + "))");
-				} else if (preOS instanceof CEU){
-					for(OS os : ((CEU) preOS).getOSes()){
-						for (OS tOS : ceu.getOSes())
-							tosConjuncts1.add("!" + tOS.ltlString());
+			ArrayList<String> tOSConjuncts2 = new ArrayList<String>();
+			// iterate through operands to group TRUE oses
+			for (Operand operand : ceu.cf.operands) {
+				for (Ordered preOS : ceu.preOrdereds) {
+					ArrayList<String> tosConjuncts1 = new ArrayList<String>();
+					if (preOS instanceof OS) {
+						// for each TRUE os
+						ArrayList<String> tOSConjuncts = new ArrayList<String>();
+						for (OS tOS : ceu.getOSes()) {
+							tOSConjuncts.add("!" + tOS.ltlString());
+						}
+						tosConjuncts1.add("(" + operand.getConstraint() + " -> ("
+								+ Utils.strongUntil("(" + Utils.conjunct(tOSConjuncts) + ")", ((OS) preOS).ltlString() + ")")
+								+ ")");
 						if (!tosConjuncts1.isEmpty())
-							preOSConjuncts.add("(F " + os.ltlString() + " -> ("
-									+ Utils.strongUntil("(" + Utils.conjunct(tosConjuncts1) + ")", os.ltlString()) + "))");
+							preOSConjuncts.add("(F " + ((OS) preOS).ltlString() + " -> (" + Utils.conjunct(tosConjuncts1) + "))");
+					} else if (preOS instanceof CEU) {
+						for (OS os : ((CEU) preOS).getOSes()) {
+							ArrayList<String> tOSConjuncts = new ArrayList<String>();
+							for (OS tOS : ceu.getOSes()) {
+								tOSConjuncts.add("!" + tOS.ltlString());
+							}
+							tosConjuncts1.add("(" + operand.getConstraint() + " -> ("
+									+ Utils.strongUntil("(" + Utils.conjunct(tOSConjuncts) + ")", os.ltlString() + ")") + ")");
+							if (!tosConjuncts1.isEmpty())
+								preOSConjuncts.add("(F " + os.ltlString() + " -> (" + Utils.conjunct(tosConjuncts1) + "))");
+						}
 					}
 				}
 			}
+			// for each tos
 
-			// for each os
-			ArrayList<String> tOSConjuncts2 = new ArrayList<String>();
+			// these TRUE OSes do not need "cond ->" before them because they
+			// use F (finally)
 			for (OS tOS : ceu.getOSes()) {
 				// for each post OS
 				ArrayList<String> postOSConjuncts = new ArrayList<String>();
